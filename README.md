@@ -19,6 +19,8 @@
 
 ## 📦 包含工具
 
+### 核心工具
+
 | 工具 | 用途 | 替代 |
 |------|------|------|
 | [Starship](https://starship.rs) | 终端提示符 | Powerlevel10k |
@@ -34,6 +36,18 @@
 | [tldr](https://tldr.sh) | 简化版 man | man |
 | [thefuck](https://github.com/nvbn/thefuck) | 命令纠错 | - |
 | [xh](https://github.com/ducaale/xh) | HTTP 客户端 | curl |
+
+### 额外现代工具
+
+| 工具 | 用途 | 替代 |
+|------|------|------|
+| [dust](https://github.com/bootandy/dust) | 磁盘使用分析 | du |
+| [duf](https://github.com/muesli/duf) | 磁盘空间查看 | df |
+| [procs](https://github.com/dalance/procs) | 进程查看 | ps |
+| [sd](https://github.com/chmln/sd) | 搜索替换 | sed |
+| [choose](https://github.com/theryangeary/choose) | 字段提取 | cut |
+| [just](https://github.com/casey/just) | 命令运行器 | make |
+| [zellij](https://github.com/zellij-org/zellij) | 终端复用器 | tmux |
 
 ## 🚀 快速开始
 
@@ -69,46 +83,93 @@ source ~/.zshrc
 
 ### 常用别名
 
+#### 文件操作
+
 | 别名 | 命令 | 说明 |
 |------|------|------|
 | `ls` | `lsd --icon=always --icon-theme=unicode` | 带图标的文件列表 |
-| `l` | `lsd --icon=always --icon-theme=unicode -lF` | 详细列表 |
-| `la` | `lsd --icon=always --icon-theme=unicode -a` | 显示隐藏文件 |
-| `ll` | `lsd --icon=always --icon-theme=unicode -lh` | 长格式 |
-| `lt` | `lsd --icon=always --icon-theme=unicode --tree` | 树形显示 |
-| `cat` | `bat --paging=never --style=plain` | 语法高亮 |
+| `l` | `lsd -lF` | 详细列表 |
+| `la` | `lsd -a` | 显示隐藏文件 |
+| `ll` | `lsd -lh` | 长格式 |
+| `lt` | `lsd --tree` | 树形显示 |
+| `cat` | `bat --paging=never` | 语法高亮 |
 | `catl` | `bat` | 带行号和分页 |
+
+#### 目录导航
+
+| 别名 | 命令 | 说明 |
+|------|------|------|
 | `cd` | `z` | 智能目录跳转 |
 | `zi` | `z -i` | 交互式选择目录 |
+| `za` | `z -a` | 添加目录到数据库 |
+| `..` | `cd ..` | 上级目录 |
+| `...` | `cd ../..` | 上两级目录 |
+
+#### 搜索工具
+
+| 别名 | 命令 | 说明 |
+|------|------|------|
 | `grep` | `rg` | 快速搜索 |
 | `find` | `fd` | 快速查找 |
+| `sed` | `sd` | 搜索替换 |
+
+#### 系统工具
+
+| 别名 | 命令 | 说明 |
+|------|------|------|
 | `top` | `btop` | 系统监控 |
 | `htop` | `btop` | 系统监控 |
-| `lg` | `lazygit` | TUI Git 客户端 |
+| `du` | `dust` | 磁盘使用 |
+| `df` | `duf` | 磁盘空间 |
+| `ps` | `procs` | 进程查看 |
+| `man` | `tldr` | 简化帮助 |
 | `help` | `tldr` | 简化帮助 |
+
+#### HTTP 客户端
+
+| 别名 | 命令 | 说明 |
+|------|------|------|
 | `http` | `xh` | HTTP 请求 |
+| `https` | `xh --https` | HTTPS 请求 |
 
 ### Git 别名
 
 | 别名 | 命令 |
 |------|------|
-| `gs` | `git status` |
+| `gs` | `git status -sb` |
 | `ga` | `git add` |
+| `gaa` | `git add --all` |
 | `gc` | `git commit` |
+| `gcm` | `git commit -m` |
+| `gca` | `git commit --amend` |
 | `gp` | `git push` |
-| `gl` | `git log --oneline --graph` |
+| `gpf` | `git push --force-with-lease` |
+| `gl` | `git log --oneline --graph --all --decorate` |
 | `gd` | `git diff` |
 | `gds` | `git diff --staged` |
-| `fbr` | `git branch \| fzf \| xargs git checkout` |
-| `fco` | `git log --oneline \| fzf ...` |
+| `gco` | `git checkout` |
+| `gcb` | `git checkout -b` |
+| `lg` | `lazygit` |
 
-### 目录导航
+### Docker 别名
 
 | 别名 | 命令 |
 |------|------|
-| `..` | `cd ..` |
-| `...` | `cd ../..` |
-| `....` | `cd ../../..` |
+| `d` | `docker` |
+| `dc` | `docker-compose` |
+| `dps` | `docker ps` |
+| `dcup` | `docker-compose up -d` |
+| `dcdown` | `docker-compose down` |
+
+### K8s 别名
+
+| 别名 | 命令 |
+|------|------|
+| `k` | `kubectl` |
+| `kg` | `kubectl get` |
+| `kd` | `kubectl describe` |
+| `kgp` | `kubectl get pods` |
+| `kl` | `kubectl logs` |
 
 ## 🎨 提示符预览
 
@@ -133,6 +194,58 @@ source ~/.zshrc
 - `🕐 14:32` - 当前时间
 - `❯` - 提示符（错误时变红）
 
+## 🛠️ 函数
+
+### mkcd - 创建目录并进入
+
+```bash
+mkcd new-project
+# 创建 new-project 目录并进入
+```
+
+### backup - 备份文件
+
+```bash
+backup important.txt
+# 创建 important.txt.bak.20240322_143200
+```
+
+### extract - 解压任何格式
+
+```bash
+extract archive.zip
+extract file.tar.gz
+extract package.7z
+```
+
+### port - 查看端口占用
+
+```bash
+port 8080
+# 显示占用 8080 端口的进程
+```
+
+### killport - 杀死端口进程
+
+```bash
+killport 8080
+# 杀死占用 8080 端口的进程
+```
+
+### genpass - 生成随机密码
+
+```bash
+genpass      # 生成 16 位密码
+genpass 32   # 生成 32 位密码
+```
+
+### tmp - 创建临时目录
+
+```bash
+tmp
+# 创建并进入临时目录
+```
+
 ## ⚙️ 自定义配置
 
 ### 修改提示符
@@ -155,7 +268,7 @@ disabled = true
 
 ### 修改别名
 
-编辑 `~/.zshrc`：
+编辑 `~/.zshrc` 或创建 `~/.zshrc.local`：
 
 ```bash
 # 添加自己的别名
@@ -221,6 +334,31 @@ brew update && brew upgrade
 omz update
 ```
 
+## 📄 文件结构
+
+```
+dotfiles/
+├── README.md              # 本文件
+├── install.sh             # 一键安装脚本 ⭐
+├── Brewfile               # Homebrew 依赖清单
+├── configs/
+│   ├── .zshenv           # 环境变量配置
+│   ├── .zshrc            # Zsh 配置（别名、工具初始化）
+│   ├── starship.toml     # Starship 提示符配置
+│   └── .gitconfig        # Git 配置模板
+└── .gitignore            # Git 忽略规则
+```
+
+### 使用 Brewfile
+
+```bash
+# 安装 Brewfile 中所有工具
+brew bundle
+
+# 只安装特定分类
+brew bundle --file=Brewfile --no-lock
+```
+
 ## 📝 手动安装（如果不想用脚本）
 
 ```bash
@@ -246,54 +384,13 @@ git clone https://github.com/zsh-users/zsh-completions ~/.oh-my-zsh/custom/plugi
 $(brew --prefix)/opt/fzf/install
 
 # 复制配置
+cp configs/.zshenv ~/
 cp configs/.zshrc ~/
 cp configs/starship.toml ~/.config/
 
 # 生效
 source ~/.zshrc
 ```
-
-## 📄 文件结构
-
-```
-dotfiles/
-├── README.md              # 本文件
-├── install.sh             # 一键安装脚本 ⭐
-├── Brewfile               # Homebrew 依赖清单
-├── configs/
-│   ├── .zshrc            # Zsh 配置（别名、工具初始化）
-│   ├── starship.toml     # Starship 提示符配置
-│   └── .gitconfig        # Git 配置模板
-└── .gitignore            # Git 忽略规则
-```
-
-### 使用 Brewfile
-
-```bash
-# 安装 Brewfile 中所有工具
-brew bundle
-
-# 只安装特定分类
-brew bundle --file=Brewfile --no-lock
-```
-
-### 配置文件说明
-
-#### `.zshrc`
-
-- Oh My Zsh 配置
-- 插件列表（git, zsh-autosuggestions, zsh-syntax-highlighting, zsh-completions）
-- 工具初始化（zoxide, fzf, thefuck, starship）
-- 36+ 个别名
-- API Keys 环境变量
-
-#### `starship.toml`
-
-- 紧凑的提示符布局
-- Emoji 图标（🏠, ⏱️, 🕐）
-- Git 状态显示
-- 命令执行时间
-- 禁用不需要的模块
 
 ## 🐛 常见问题
 

@@ -2,10 +2,13 @@
 
 # ============================================================
 # macOS 终端环境一键配置脚本
+# 作者: davirian
+# 用途: 在新 Mac 上快速配置完整的终端开发环境
 # ============================================================
 
 set -e
 
+# 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -17,14 +20,16 @@ print_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
 print_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
 print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
+# 检查是否为 macOS
 check_macos() {
     if [[ "$OSTYPE" != "darwin"* ]]; then
         print_error "此脚本仅支持 macOS"
         exit 1
     fi
-    print_success "检测到 macOS 系统"
+    print_success "检测到 macOS 系统 ($(uname -m))"
 }
 
+# 安装 Homebrew
 install_homebrew() {
     if command -v brew &> /dev/null; then
         print_info "Homebrew 已安装，更新中..."
@@ -40,43 +45,91 @@ install_homebrew() {
     print_success "Homebrew 就绪"
 }
 
+# 安装基础工具
 install_base_tools() {
     print_info "安装基础工具..."
-    brew install git curl wget jq tree ripgrep fd fzf bat lsd zoxide delta btop lazygit tlrc thefuck xh starship 2>/dev/null || true
+    
+    local tools=(
+        git curl wget jq tree openssl gnupg nmap
+        starship lsd eza bat fzf zoxide ripgrep fd
+        delta lazygit btop tlrc thefuck xh zellij
+        dust duf procs sd choose
+        just
+        node python go zig
+        docker kubectl
+        postgresql redis sqlite
+        neovim
+        ffmpeg
+    )
+    
+    for tool in "${tools[@]}"; do
+        if brew list "$tool" &>/dev/null; then
+            print_warning "$tool 已安装"
+        else
+            print_info "安装 $tool..."
+            brew install "$tool" 2>/dev/null || print_warning "$tool 安装失败"
+        fi
+    done
+    
     print_success "基础工具安装完成"
 }
 
+# 安装字体
 install_fonts() {
     print_info "安装 Nerd Fonts..."
     brew tap homebrew/cask-fonts 2>/dev/null || true
-    brew install --cask font-meslo-lg-nerd-font 2>/dev/null || true
+    
+    local fonts=(
+        font-meslo-lg-nerd-font
+        font-jetbrains-mono-nerd-font
+        font-fira-code-nerd-font
+    )
+    
+    for font in "${fonts[@]}"; do
+        if brew list --cask "$font" &>/dev/null; then
+            print_warning "$font 已安装"
+        else
+            brew install --cask "$font" 2>/dev/null || print_warning "$font 安装失败"
+        fi
+    done
+    
     print_success "字体安装完成"
 }
 
+# 安装 Oh My Zsh
 install_ohmyzsh() {
     if [ -d "$HOME/.oh-my-zsh" ]; then
         print_warning "Oh My Zsh 已安装"
         return
     fi
+    
     print_info "安装 Oh My Zsh..."
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
     print_success "Oh My Zsh 安装完成"
 }
 
+# 安装 Zsh 插件
 install_zsh_plugins() {
     print_info "安装 Zsh 插件..."
-    if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions" ]; then
-        git clone https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions" 2>/dev/null || true
-    fi
-    if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting" ]; then
-        git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting" 2>/dev/null || true
-    fi
-    if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-completions" ]; then
-        git clone https://github.com/zsh-users/zsh-completions "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-completions" 2>/dev/null || true
-    fi
+    
+    local plugins=(
+        "zsh-users/zsh-autosuggestions"
+        "zsh-users/zsh-syntax-highlighting"
+        "zsh-users/zsh-completions"
+    )
+    
+    for plugin in "${plugins[@]}"; do
+        local name=$(basename "$plugin")
+        if [ ! -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/$name" ]; then
+            git clone "https://github.com/$plugin" \
+                "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/$name" 2>/dev/null || true
+        fi
+    done
+    
     print_success "Zsh 插件安装完成"
 }
 
+# 配置 fzf
 setup_fzf() {
     print_info "配置 fzf..."
     if [ ! -f ~/.fzf.zsh ]; then
@@ -85,34 +138,64 @@ setup_fzf() {
     print_success "fzf 配置完成"
 }
 
+# 备份现有配置
 backup_configs() {
     print_info "备份现有配置..."
     BACKUP_DIR="$HOME/.config_backup_$(date +%Y%m%d_%H%M%S)"
     mkdir -p "$BACKUP_DIR"
+    
     [ -f ~/.zshrc ] && cp ~/.zshrc "$BACKUP_DIR/"
+    [ -f ~/.zshenv ] && cp ~/.zshenv "$BACKUP_DIR/"
     [ -f ~/.config/starship.toml ] && cp ~/.config/starship.toml "$BACKUP_DIR/"
+    
     print_success "配置已备份到 $BACKUP_DIR"
 }
 
+# 安装配置文件
 install_configs() {
     print_info "安装配置文件..."
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    
+    # .zshenv
+    cp "$SCRIPT_DIR/configs/.zshenv" ~/.zshenv
+    
+    # .zshrc
     cp "$SCRIPT_DIR/configs/.zshrc" ~/.zshrc
+    
+    # Starship
     mkdir -p ~/.config
     cp "$SCRIPT_DIR/configs/starship.toml" ~/.config/starship.toml
+    
+    # Git config
+    if [ -f "$SCRIPT_DIR/configs/.gitconfig" ]; then
+        cp "$SCRIPT_DIR/configs/.gitconfig" ~/.gitconfig
+    fi
+    
     print_success "配置文件安装完成"
 }
 
+# 配置 Git
 git_config() {
     print_info "配置 Git..."
+    
+    # 配置 delta
     git config --global core.pager delta 2>/dev/null || true
     git config --global interactive.diffFilter 'delta --color-only' 2>/dev/null || true
     git config --global delta.navigate true 2>/dev/null || true
     git config --global delta.light false 2>/dev/null || true
     git config --global delta.side-by-side true 2>/dev/null || true
+    
+    # 其他 Git 配置
+    git config --global init.defaultBranch main 2>/dev/null || true
+    git config --global push.default simple 2>/dev/null || true
+    
     print_success "Git 配置完成"
+    print_warning "请记得配置 Git 用户名和邮箱:"
+    echo "  git config --global user.name 'Your Name'"
+    echo "  git config --global user.email 'your.email@example.com'"
 }
 
+# 主函数
 main() {
     echo ""
     echo "============================================================"
@@ -121,6 +204,7 @@ main() {
     echo ""
     
     check_macos
+    
     read -p "此脚本将修改你的终端配置，是否继续? (y/N) " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -144,6 +228,13 @@ main() {
     echo "============================================================"
     echo ""
     echo "请执行: source ~/.zshrc"
+    echo ""
+    echo "快捷键:"
+    echo "  Ctrl+T  - 查找文件"
+    echo "  Ctrl+R  - 查找历史命令"
+    echo "  Alt+C   - 查找目录"
+    echo "  lg      - 打开 lazygit"
+    echo "  btop    - 系统监控"
     echo ""
 }
 

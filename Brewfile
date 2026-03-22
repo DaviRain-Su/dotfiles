@@ -28,6 +28,14 @@ brew "thefuck"
 brew "xh"
 brew "zellij"
 
+# 额外现代工具
+brew "dust"        # du 替代
+brew "duf"         # df 替代
+brew "procs"       # ps 替代
+brew "sd"          # sed 替代
+brew "choose"      # cut 替代
+brew "just"        # make 替代
+
 # 开发语言
 brew "node"
 brew "python"
@@ -51,3 +59,5 @@ brew "ffmpeg"
 
 # 字体
 cask "font-meslo-lg-nerd-font"
+cask "font-jetbrains-mono-nerd-font"
+cask "font-fira-code-nerd-font"
