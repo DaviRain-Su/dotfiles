@@ -1,0 +1,50 @@
+#!/bin/sh
+#
+# dot - dotfiles management
+
+set -e
+
+parentDirectory="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P)"
+dotfilesDirectory="$(cd "$( dirname "$parentDirectory" )" && pwd -P)"
+
+displayUsageAndExit() {
+	echo "dot -- dotfiles management"
+	echo ""
+	echo "Usage: dot [options]"
+	echo ""
+	echo "Options:"
+	echo "  -e, --edit    Open dotfiles directory for editing"
+	echo "  -u, --update  Update dotfiles from git"
+	echo "  -h, --help    Show this help message and exit"
+	exit
+}
+
+while test $# -gt 0; do
+	case "$1" in
+		"-h"|"--help")
+			displayUsageAndExit
+			;;
+		"-e"|"--edit")
+			exec "$EDITOR" "$dotfilesDirectory"
+			exit
+			;;
+		"-u"|"--update")
+			echo "Updating dotfiles..."
+			git -C "$dotfilesDirectory" pull
+			exit
+			;;
+		*)
+			echo "Invalid option: $1"
+			displayUsageAndExit
+			;;
+	esac
+	shift
+done
+
+# 默认：显示状态
+echo "Dotfiles directory: $dotfilesDirectory"
+echo ""
+echo "Recent commits:"
+git -C "$dotfilesDirectory" log --oneline -5 2>/dev/null || echo "Not a git repository"
+echo ""
+echo "Use 'dot -e' to edit, 'dot -u' to update"

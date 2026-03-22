@@ -1,0 +1,7 @@
+#compdef c
+
+_c() {
+    local projects
+    projects=(${(f)"$(ls -1 $PROJECTS 2>/dev/null)"})
+    _describe 'projects' projects
+}

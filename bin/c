@@ -1,0 +1,13 @@
+#!/bin/zsh
+#
+# Quick cd to projects
+#
+# Usage: c [project-name]
+
+PROJECTS_DIR="${PROJECTS:-$HOME/dev}"
+
+if [ -z "$1" ]; then
+    cd "$PROJECTS_DIR"
+else
+    cd "$PROJECTS_DIR/$1"
+fi
