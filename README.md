@@ -258,11 +258,23 @@ source ~/.zshrc
 ```
 dotfiles/
 ├── README.md              # 本文件
-├── install.sh             # 一键安装脚本
+├── install.sh             # 一键安装脚本 ⭐
+├── Brewfile               # Homebrew 依赖清单
 ├── configs/
 │   ├── .zshrc            # Zsh 配置（别名、工具初始化）
-│   └── starship.toml     # Starship 提示符配置
+│   ├── starship.toml     # Starship 提示符配置
+│   └── .gitconfig        # Git 配置模板
 └── .gitignore            # Git 忽略规则
+```
+
+### 使用 Brewfile
+
+```bash
+# 安装 Brewfile 中所有工具
+brew bundle
+
+# 只安装特定分类
+brew bundle --file=Brewfile --no-lock
 ```
 
 ### 配置文件说明
