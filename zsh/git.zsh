@@ -1,0 +1,75 @@
+# ============================================
+# Git 配置
+# ============================================
+
+# 配置 git 使用 delta
+git config --global core.pager delta 2>/dev/null || true
+git config --global interactive.diffFilter 'delta --color-only' 2>/dev/null || true
+git config --global delta.navigate true 2>/dev/null || true
+git config --global delta.light false 2>/dev/null || true
+git config --global delta.side-by-side true 2>/dev/null || true
+
+# 其他 Git 配置
+git config --global init.defaultBranch main 2>/dev/null || true
+git config --global push.default simple 2>/dev/null || true
+
+# Git 别名
+alias gs='git status -sb'
+alias ga='git add'
+alias gaa='git add --all'
+alias gc='git commit'
+alias gcm='git commit -m'
+alias gca='git commit --amend'
+alias gp='git push'
+alias gpf='git push --force-with-lease'
+alias gl='git log --oneline --graph --all --decorate'
+alias glg='git log --stat'
+alias gd='git diff'
+alias gds='git diff --staged'
+alias gco='git checkout'
+alias gcb='git checkout -b'
+alias gbr='git branch'
+alias gbd='git branch -d'
+alias gbD='git branch -D'
+alias gst='git stash'
+alias gstp='git stash pop'
+alias gpl='git pull'
+alias grb='git rebase'
+alias grbc='git rebase --continue'
+alias grba='git rebase --abort'
+alias grh='git reset HEAD'
+alias grhh='git reset HEAD --hard'
+alias gclean='git clean -fd'
+alias gpristine='git reset --hard && git clean -dfx'
+alias gcount='git shortlog -sn'
+alias gcp='git cherry-pick'
+alias gcs='git commit -S'
+alias lg='lazygit'
+
+# Docker 别名
+alias d='docker'
+alias dc='docker-compose'
+alias dps='docker ps'
+alias dpsa='docker ps -a'
+alias di='docker images'
+alias dex='docker exec -it'
+alias dlog='docker logs -f'
+alias dcup='docker-compose up -d'
+alias dcdown='docker-compose down'
+alias dcrestart='docker-compose restart'
+
+# K8s 别名
+alias k='kubectl'
+alias kg='kubectl get'
+alias kd='kubectl describe'
+alias kdel='kubectl delete'
+alias ka='kubectl apply -f'
+alias kgp='kubectl get pods'
+alias kgs='kubectl get svc'
+alias kgn='kubectl get nodes'
+alias kgd='kubectl get deployments'
+alias kl='kubectl logs'
+alias klf='kubectl logs -f'
+alias ke='kubectl exec -it'
+alias kctx='kubectl config current-context'
+alias kns='kubectl config set-context --current --namespace'

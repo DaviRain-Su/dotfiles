@@ -1,0 +1,33 @@
+#!/bin/zsh
+
+# ============================================
+# 主 Zsh 配置文件
+# 模块化加载各个配置
+# ============================================
+
+# 获取 dotfiles 目录路径
+export DOTFILES="${HOME}/dotfiles"
+
+# 加载环境变量
+source "${DOTFILES}/zsh/env.zsh"
+
+# 加载 Oh My Zsh
+source "${DOTFILES}/zsh/omz.zsh"
+
+# 加载工具初始化
+source "${DOTFILES}/zsh/tools.zsh"
+
+# 加载别名
+source "${DOTFILES}/zsh/aliases.zsh"
+
+# 加载函数
+source "${DOTFILES}/zsh/functions.zsh"
+
+# 加载 fzf 配置
+source "${DOTFILES}/zsh/fzf.zsh"
+
+# 加载 Git 配置
+source "${DOTFILES}/zsh/git.zsh"
+
+# 加载本地配置（如果存在）
+[[ -f "${HOME}/.zshrc.local" ]] && source "${HOME}/.zshrc.local"

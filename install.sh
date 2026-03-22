@@ -1,14 +1,13 @@
 #!/bin/bash
 
-# ============================================================
+# ============================================
 # macOS 终端环境一键配置脚本
 # 作者: davirian
 # 用途: 在新 Mac 上快速配置完整的终端开发环境
-# ============================================================
+# ============================================
 
 set -e
 
-# 颜色定义
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -20,7 +19,6 @@ print_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
 print_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
 print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
-# 检查是否为 macOS
 check_macos() {
     if [[ "$OSTYPE" != "darwin"* ]]; then
         print_error "此脚本仅支持 macOS"
@@ -29,7 +27,6 @@ check_macos() {
     print_success "检测到 macOS 系统 ($(uname -m))"
 }
 
-# 安装 Homebrew
 install_homebrew() {
     if command -v brew &> /dev/null; then
         print_info "Homebrew 已安装，更新中..."
@@ -45,7 +42,6 @@ install_homebrew() {
     print_success "Homebrew 就绪"
 }
 
-# 安装基础工具
 install_base_tools() {
     print_info "安装基础工具..."
     
@@ -74,7 +70,6 @@ install_base_tools() {
     print_success "基础工具安装完成"
 }
 
-# 安装字体
 install_fonts() {
     print_info "安装 Nerd Fonts..."
     brew tap homebrew/cask-fonts 2>/dev/null || true
@@ -96,7 +91,6 @@ install_fonts() {
     print_success "字体安装完成"
 }
 
-# 安装 Oh My Zsh
 install_ohmyzsh() {
     if [ -d "$HOME/.oh-my-zsh" ]; then
         print_warning "Oh My Zsh 已安装"
@@ -108,7 +102,6 @@ install_ohmyzsh() {
     print_success "Oh My Zsh 安装完成"
 }
 
-# 安装 Zsh 插件
 install_zsh_plugins() {
     print_info "安装 Zsh 插件..."
     
@@ -129,7 +122,6 @@ install_zsh_plugins() {
     print_success "Zsh 插件安装完成"
 }
 
-# 配置 fzf
 setup_fzf() {
     print_info "配置 fzf..."
     if [ ! -f ~/.fzf.zsh ]; then
@@ -138,54 +130,40 @@ setup_fzf() {
     print_success "fzf 配置完成"
 }
 
-# 备份现有配置
-backup_configs() {
-    print_info "备份现有配置..."
-    BACKUP_DIR="$HOME/.config_backup_$(date +%Y%m%d_%H%M%S)"
-    mkdir -p "$BACKUP_DIR"
+install_dotfiles() {
+    print_info "安装 dotfiles..."
     
-    [ -f ~/.zshrc ] && cp ~/.zshrc "$BACKUP_DIR/"
-    [ -f ~/.zshenv ] && cp ~/.zshenv "$BACKUP_DIR/"
-    [ -f ~/.config/starship.toml ] && cp ~/.config/starship.toml "$BACKUP_DIR/"
-    
-    print_success "配置已备份到 $BACKUP_DIR"
-}
-
-# 安装配置文件
-install_configs() {
-    print_info "安装配置文件..."
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     
+    # 创建符号链接
+    mkdir -p ~/.config
+    
     # .zshenv
-    cp "$SCRIPT_DIR/configs/.zshenv" ~/.zshenv
+    if [ -f "$HOME/.zshenv" ]; then
+        mv "$HOME/.zshenv" "$HOME/.zshenv.backup.$(date +%Y%m%d_%H%M%S)"
+    fi
+    ln -sf "${SCRIPT_DIR}/configs/.zshenv" "$HOME/.zshenv"
     
     # .zshrc
-    cp "$SCRIPT_DIR/configs/.zshrc" ~/.zshrc
-    
-    # Starship
-    mkdir -p ~/.config
-    cp "$SCRIPT_DIR/configs/starship.toml" ~/.config/starship.toml
-    
-    # Git config
-    if [ -f "$SCRIPT_DIR/configs/.gitconfig" ]; then
-        cp "$SCRIPT_DIR/configs/.gitconfig" ~/.gitconfig
+    if [ -f "$HOME/.zshrc" ] && [ ! -L "$HOME/.zshrc" ]; then
+        mv "$HOME/.zshrc" "$HOME/.zshrc.backup.$(date +%Y%m%d_%H%M%S)"
     fi
+    ln -sf "${SCRIPT_DIR}/configs/.zshrc" "$HOME/.zshrc"
     
-    print_success "配置文件安装完成"
+    # starship.toml
+    ln -sf "${SCRIPT_DIR}/configs/starship.toml" "$HOME/.config/starship.toml"
+    
+    print_success "dotfiles 安装完成"
 }
 
-# 配置 Git
 git_config() {
     print_info "配置 Git..."
     
-    # 配置 delta
     git config --global core.pager delta 2>/dev/null || true
     git config --global interactive.diffFilter 'delta --color-only' 2>/dev/null || true
     git config --global delta.navigate true 2>/dev/null || true
     git config --global delta.light false 2>/dev/null || true
     git config --global delta.side-by-side true 2>/dev/null || true
-    
-    # 其他 Git 配置
     git config --global init.defaultBranch main 2>/dev/null || true
     git config --global push.default simple 2>/dev/null || true
     
@@ -195,7 +173,19 @@ git_config() {
     echo "  git config --global user.email 'your.email@example.com'"
 }
 
-# 主函数
+setup_macos() {
+    read -p "是否配置 macOS 系统设置? (y/N) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        print_info "配置 macOS 系统设置..."
+        if [ -f "${SCRIPT_DIR}/macos.sh" ]; then
+            bash "${SCRIPT_DIR}/macos.sh"
+        else
+            print_warning "macos.sh 不存在，跳过"
+        fi
+    fi
+}
+
 main() {
     echo ""
     echo "============================================================"
@@ -218,9 +208,9 @@ main() {
     install_ohmyzsh
     install_zsh_plugins
     setup_fzf
-    backup_configs
-    install_configs
+    install_dotfiles
     git_config
+    setup_macos
     
     echo ""
     echo "============================================================"

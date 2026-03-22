@@ -2,7 +2,7 @@
 
 一键配置美观、高效的 macOS 终端开发环境。
 
-![Terminal Preview](https://user-images.githubusercontent.com/placeholder/terminal-preview.png)
+参考了 [mathiasbynens/dotfiles](https://github.com/mathiasbynens/dotfiles) 和 [keith/dotfiles](https://github.com/keith/dotfiles) 的优秀实践。
 
 ## ✨ 特性
 
@@ -16,6 +16,8 @@
 - **⚙️ Git 增强** - delta + lazygit
 - **📊 系统监控** - btop 美观的资源监控
 - **🌐 HTTP 客户端** - xh 现代化的 curl 替代品
+- **🔧 模块化配置** - 参考 keith/dotfiles 的模块化结构
+- **🍎 macOS 优化** - 系统设置脚本
 
 ## 📦 包含工具
 
@@ -51,21 +53,35 @@
 
 ## 🚀 快速开始
 
-### 1. 克隆仓库
+### 方式一：使用 install.sh（推荐）
 
 ```bash
 git clone https://github.com/DaviRain-Su/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-```
-
-### 2. 运行安装脚本
-
-```bash
-chmod +x install.sh
 ./install.sh
 ```
 
-### 3. 重启终端或执行
+### 方式二：使用 setup.sh（符号链接方式）
+
+```bash
+git clone https://github.com/DaviRain-Su/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+./setup.sh install
+```
+
+### 方式三：使用 Brewfile
+
+```bash
+# 只安装 Homebrew 包
+brew bundle
+
+# 然后手动链接配置
+ln -s ~/dotfiles/configs/.zshrc ~/.zshrc
+ln -s ~/dotfiles/configs/.zshenv ~/.zshenv
+ln -s ~/dotfiles/configs/starship.toml ~/.config/starship.toml
+```
+
+### 生效
 
 ```bash
 source ~/.zshrc
@@ -147,8 +163,6 @@ source ~/.zshrc
 | `gl` | `git log --oneline --graph --all --decorate` |
 | `gd` | `git diff` |
 | `gds` | `git diff --staged` |
-| `gco` | `git checkout` |
-| `gcb` | `git checkout -b` |
 | `lg` | `lazygit` |
 
 ### Docker 别名
@@ -250,7 +264,7 @@ tmp
 
 ### 修改提示符
 
-编辑 `~/.config/starship.toml`：
+编辑 `~/dotfiles/configs/starship.toml`：
 
 ```toml
 # 修改家目录图标
@@ -268,7 +282,7 @@ disabled = true
 
 ### 修改别名
 
-编辑 `~/.zshrc` 或创建 `~/.zshrc.local`：
+编辑 `~/dotfiles/zsh/aliases.zsh` 或创建 `~/.zshrc.local`：
 
 ```bash
 # 添加自己的别名
@@ -284,6 +298,23 @@ alias myalias='mycommand'
 git config --global user.name "Your Name"
 git config --global user.email "your.email@example.com"
 ```
+
+## 🍎 macOS 系统配置
+
+运行 macOS 系统优化脚本：
+
+```bash
+./macos.sh
+```
+
+这会配置：
+- 禁用启动音效
+- 设置键盘重复速率
+- 启用触控板轻触点击
+- 配置 Finder 显示隐藏文件
+- 配置 Dock 自动隐藏
+- 启用 Safari 开发者菜单
+- 等等...
 
 ## 🖥️ iTerm2 推荐设置
 
@@ -303,11 +334,6 @@ git config --global user.email "your.email@example.com"
 
 下载地址：https://iterm2colorschemes.com/
 
-导入方法：
-1. iTerm2 → Preferences → Profiles → Colors
-2. Color Presets → Import
-3. 选择下载的 `.itermcolors` 文件
-
 ### 3. 窗口设置
 
 Preferences → Profiles → Window:
@@ -316,12 +342,20 @@ Preferences → Profiles → Window:
 
 ## 🔄 更新
 
-### 更新本仓库
+### 使用 setup.sh 更新
+
+```bash
+cd ~/dotfiles
+./setup.sh update
+./setup.sh install
+```
+
+### 手动更新
 
 ```bash
 cd ~/dotfiles
 git pull
-./install.sh
+source ~/.zshrc
 ```
 
 ### 更新工具
@@ -340,12 +374,24 @@ omz update
 dotfiles/
 ├── README.md              # 本文件
 ├── install.sh             # 一键安装脚本 ⭐
+├── setup.sh               # 配置管理脚本（符号链接方式）
+├── macos.sh               # macOS 系统配置脚本
 ├── Brewfile               # Homebrew 依赖清单
-├── configs/
-│   ├── .zshenv           # 环境变量配置
-│   ├── .zshrc            # Zsh 配置（别名、工具初始化）
+├── configs/               # 配置文件
+│   ├── .zshenv           # 环境变量
+│   ├── .zshrc            # 主 zshrc（加载模块化配置）
 │   ├── starship.toml     # Starship 提示符配置
 │   └── .gitconfig        # Git 配置模板
+├── zsh/                   # 模块化 zsh 配置 ⭐
+│   ├── zshrc             # 主入口
+│   ├── env.zsh           # 环境变量
+│   ├── omz.zsh           # Oh My Zsh 配置
+│   ├── tools.zsh         # 工具初始化
+│   ├── aliases.zsh       # 别名
+│   ├── functions.zsh     # 函数
+│   ├── fzf.zsh           # fzf 配置
+│   └── git.zsh           # Git 别名
+├── scripts/               # 辅助脚本
 └── .gitignore            # Git 忽略规则
 ```
 
@@ -355,41 +401,11 @@ dotfiles/
 # 安装 Brewfile 中所有工具
 brew bundle
 
-# 只安装特定分类
-brew bundle --file=Brewfile --no-lock
-```
+# 检查哪些包需要安装
+brew bundle check
 
-## 📝 手动安装（如果不想用脚本）
-
-```bash
-# 安装 Homebrew
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# 安装工具
-brew install starship lsd bat fzf zoxide ripgrep fd delta lazygit btop tlrc thefuck xh
-
-# 安装字体
-brew tap homebrew/cask-fonts
-brew install --cask font-meslo-lg-nerd-font
-
-# 安装 Oh My Zsh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-
-# 安装插件
-git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
-git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
-git clone https://github.com/zsh-users/zsh-completions ~/.oh-my-zsh/custom/plugins/zsh-completions
-
-# 配置 fzf
-$(brew --prefix)/opt/fzf/install
-
-# 复制配置
-cp configs/.zshenv ~/
-cp configs/.zshrc ~/
-cp configs/starship.toml ~/.config/
-
-# 生效
-source ~/.zshrc
+# 清理不需要的包
+brew bundle cleanup
 ```
 
 ## 🐛 常见问题
@@ -427,10 +443,10 @@ z some  # 之后可以用 z some 快速跳转
 ### 如何恢复原始配置？
 
 ```bash
-# 安装脚本会自动备份到 ~/.config_backup_日期/
+# 安装脚本会自动备份到 ~/.dotfiles_backup_日期/
 # 手动恢复
-cp ~/.config_backup_xxxx/.zshrc ~/
-cp ~/.config_backup_xxxx/starship.toml ~/.config/
+cp ~/.dotfiles_backup_xxxx/.zshrc ~/
+cp ~/.dotfiles_backup_xxxx/.zshenv ~/
 ```
 
 ## 🤝 贡献
@@ -443,6 +459,8 @@ MIT License
 
 ## 🙏 致谢
 
+- [mathiasbynens/dotfiles](https://github.com/mathiasbynens/dotfiles) - 优秀的 macOS 配置
+- [keith/dotfiles](https://github.com/keith/dotfiles) - 模块化配置结构
 - [Oh My Zsh](https://ohmyz.sh/)
 - [Starship](https://starship.rs/)
 - [Homebrew](https://brew.sh/)
