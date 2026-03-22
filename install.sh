@@ -2,8 +2,7 @@
 
 # ============================================
 # macOS 终端环境一键配置脚本
-# 作者: davirian
-# 用途: 在新 Mac 上快速配置完整的终端开发环境
+# 参考: mathiasbynens/dotfiles, holman/dotfiles, keith/dotfiles
 # ============================================
 
 set -e
@@ -130,8 +129,40 @@ setup_fzf() {
     print_success "fzf 配置完成"
 }
 
-install_dotfiles() {
-    print_info "安装 dotfiles..."
+# mathias 风格的 rsync 安装
+install_dotfiles_rsync() {
+    print_info "使用 rsync 安装 dotfiles..."
+    
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    
+    # 使用 rsync 同步文件（mathias 风格）
+    rsync --exclude ".git/" \
+          --exclude ".DS_Store" \
+          --exclude "*.md" \
+          --exclude "install.sh" \
+          --exclude "setup.sh" \
+          --exclude "macos.sh" \
+          --exclude "Brewfile" \
+          --exclude "MATHIAS_ANALYSIS.md" \
+          --exclude "script/" \
+          --exclude "bin/" \
+          --exclude "zsh/" \
+          --exclude "configs/" \
+          -avh --no-perms "${SCRIPT_DIR}/configs/" ~
+    
+    # 链接 zsh 配置
+    ln -sf "${SCRIPT_DIR}/zsh/zshrc" ~/.zshrc
+    
+    # 链接 starship 配置
+    mkdir -p ~/.config
+    ln -sf "${SCRIPT_DIR}/configs/starship.toml" ~/.config/starship.toml
+    
+    print_success "dotfiles 安装完成"
+}
+
+# 符号链接安装（holman 风格）
+install_dotfiles_symlink() {
+    print_info "使用符号链接安装 dotfiles..."
     
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     
@@ -139,7 +170,7 @@ install_dotfiles() {
     mkdir -p ~/.config
     
     # .zshenv
-    if [ -f "$HOME/.zshenv" ]; then
+    if [ -f "$HOME/.zshenv" ] && [ ! -L "$HOME/.zshenv" ]; then
         mv "$HOME/.zshenv" "$HOME/.zshenv.backup.$(date +%Y%m%d_%H%M%S)"
     fi
     ln -sf "${SCRIPT_DIR}/configs/.zshenv" "$HOME/.zshenv"
@@ -148,10 +179,17 @@ install_dotfiles() {
     if [ -f "$HOME/.zshrc" ] && [ ! -L "$HOME/.zshrc" ]; then
         mv "$HOME/.zshrc" "$HOME/.zshrc.backup.$(date +%Y%m%d_%H%M%S)"
     fi
-    ln -sf "${SCRIPT_DIR}/configs/.zshrc" "$HOME/.zshrc"
+    ln -sf "${SCRIPT_DIR}/zsh/zshrc" "$HOME/.zshrc"
     
     # starship.toml
     ln -sf "${SCRIPT_DIR}/configs/starship.toml" "$HOME/.config/starship.toml"
+    
+    # 其他配置文件
+    for file in .path .exports .aliases .functions .extra .curlrc .wgetrc .hushlogin; do
+        if [ -f "${SCRIPT_DIR}/configs/$file" ]; then
+            ln -sf "${SCRIPT_DIR}/configs/$file" "$HOME/$file"
+        fi
+    done
     
     print_success "dotfiles 安装完成"
 }
@@ -168,9 +206,9 @@ git_config() {
     git config --global push.default simple 2>/dev/null || true
     
     print_success "Git 配置完成"
-    print_warning "请记得配置 Git 用户名和邮箱:"
-    echo "  git config --global user.name 'Your Name'"
-    echo "  git config --global user.email 'your.email@example.com'"
+    print_warning "请记得配置 Git 用户名和邮箱（可以编辑 ~/.extra）："
+    echo "  export GIT_AUTHOR_NAME='Your Name'"
+    echo "  export GIT_AUTHOR_EMAIL='your.email@example.com'"
 }
 
 setup_macos() {
@@ -190,6 +228,7 @@ main() {
     echo ""
     echo "============================================================"
     echo "  macOS 终端环境一键配置脚本"
+    echo "  参考: mathiasbynens/dotfiles"
     echo "============================================================"
     echo ""
     
@@ -202,13 +241,29 @@ main() {
         exit 1
     fi
     
+    # 选择安装方式
+    echo ""
+    echo "选择安装方式:"
+    echo "  1) rsync - 复制文件（推荐，mathias 风格）"
+    echo "  2) symlink - 符号链接（holman 风格）"
+    read -p "请选择 (1/2): " install_method
+    
     install_homebrew
     install_base_tools
     install_fonts
     install_ohmyzsh
     install_zsh_plugins
     setup_fzf
-    install_dotfiles
+    
+    case "$install_method" in
+        2)
+            install_dotfiles_symlink
+            ;;
+        *)
+            install_dotfiles_rsync
+            ;;
+    esac
+    
     git_config
     setup_macos
     
@@ -219,12 +274,10 @@ main() {
     echo ""
     echo "请执行: source ~/.zshrc"
     echo ""
-    echo "快捷键:"
-    echo "  Ctrl+T  - 查找文件"
-    echo "  Ctrl+R  - 查找历史命令"
-    echo "  Alt+C   - 查找目录"
-    echo "  lg      - 打开 lazygit"
-    echo "  btop    - 系统监控"
+    echo "提示:"
+    echo "  - 编辑 ~/.extra 添加你的 Git 用户名和 API Keys"
+    echo "  - 运行 'dot' 命令管理 dotfiles"
+    echo "  - 运行 'c <project>' 快速进入项目"
     echo ""
 }
 

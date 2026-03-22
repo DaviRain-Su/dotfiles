@@ -1,0 +1,14 @@
+# ============================================
+# PATH 配置
+# 优先加载，用于设置 $PATH
+# ============================================
+
+# 添加常用路径
+export PATH="./bin:$HOME/.local/bin:$HOME/.cargo/bin:/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+
+# Go
+export GOPATH="$HOME/go"
+export PATH="$GOPATH/bin:$PATH"
+
+# Node.js (如果使用 npm 全局安装)
+export PATH="$HOME/.npm-global/bin:$PATH"
