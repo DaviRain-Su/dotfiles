@@ -1,0 +1,214 @@
+# Starship 配置
+# 紧凑简洁的终端提示符
+
+command_timeout = 2000
+add_newline = false
+
+format = """$directory$git_branch$git_status$cmd_duration$time $character"""
+
+[directory]
+format = "[$path]($style) "
+truncation_length = 10
+truncation_symbol = "…/"
+style = "cyan bold"
+home_symbol = "🏠 ~"
+read_only = " "
+read_only_style = "red"
+
+[git_branch]
+symbol = ""
+format = "[$symbol$branch]($style)"
+style = "purple bold"
+
+[git_status]
+format = '([$all_status]($style))'
+style = "yellow"
+conflicted = "✕"
+ahead = "↑${count}"
+behind = "↓${count}"
+diverged = "↕${count}"
+untracked = "?${count}"
+stashed = "📦"
+modified = "!${count}"
+staged = "+${count}"
+renamed = "→${count}"
+deleted = "✗${count}"
+
+[cmd_duration]
+min_time = 2000
+format = " ⏱️ ${duration}"
+style = "yellow"
+show_notifications = false
+
+[time]
+disabled = false
+format = " 🕐 ${time}"
+time_format = "%H:%M"
+style = "bright-black"
+
+[character]
+success_symbol = "[❯](green bold)"
+error_symbol = "[❯](red bold)"
+vimcmd_symbol = "[❮](green bold)"
+vimcmd_replace_one_symbol = "[❮](purple bold)"
+vimcmd_replace_symbol = "[❮](purple bold)"
+vimcmd_visual_symbol = "[❮](yellow bold)"
+
+[git_state]
+disabled = true
+
+[username]
+disabled = true
+
+[hostname]
+disabled = true
+
+[container]
+disabled = true
+
+[shell]
+disabled = true
+
+[shlvl]
+disabled = true
+
+[jobs]
+disabled = true
+
+[battery]
+disabled = true
+
+[memory_usage]
+disabled = true
+
+[package]
+disabled = true
+
+[nodejs]
+disabled = true
+
+[python]
+disabled = true
+
+[ruby]
+disabled = true
+
+[rust]
+disabled = true
+
+[golang]
+disabled = true
+
+[java]
+disabled = true
+
+[kotlin]
+disabled = true
+
+[php]
+disabled = true
+
+[lua]
+disabled = true
+
+[swift]
+disabled = true
+
+[aws]
+disabled = true
+
+[docker_context]
+disabled = true
+
+[kubernetes]
+disabled = true
+
+[terraform]
+disabled = true
+
+[conda]
+disabled = true
+
+[helm]
+disabled = true
+
+[vcsh]
+disabled = true
+
+[hg_branch]
+disabled = true
+
+[pijul_channel]
+disabled = true
+
+[crystal]
+disabled = true
+
+[dart]
+disabled = true
+
+[deno]
+disabled = true
+
+[dotnet]
+disabled = true
+
+[elixir]
+disabled = true
+
+[elm]
+disabled = true
+
+[erlang]
+disabled = true
+
+[gcloud]
+disabled = true
+
+[haskell]
+disabled = true
+
+[julia]
+disabled = true
+
+[nim]
+disabled = true
+
+[nix_shell]
+disabled = true
+
+[ocaml]
+disabled = true
+
+[openstack]
+disabled = true
+
+[perl]
+disabled = true
+
+[pulumi]
+disabled = true
+
+[purescript]
+disabled = true
+
+[rlang]
+disabled = true
+
+[scala]
+disabled = true
+
+[singularity]
+disabled = true
+
+[spack]
+disabled = true
+
+[status]
+disabled = true
+
+[vagrant]
+disabled = true
+
+[zig]
+disabled = true
