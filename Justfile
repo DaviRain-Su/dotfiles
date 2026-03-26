@@ -51,6 +51,10 @@ link:
         ln -sf {{DOTFILES}}/configs/zellij/config.kdl ~/.config/zellij/config.kdl
     } || true
 
+    # Pi (pi-messenger Crew 配置)
+    mkdir -p ~/.pi/agent
+    ln -sf {{DOTFILES}}/configs/agents/pi/pi-messenger.json ~/.pi/agent/pi-messenger.json
+
     echo "✓ 符号链接已更新"
 
 # 从 Git 拉取最新配置
