@@ -1,15 +1,7 @@
 # ============================================
 # 环境变量配置
+# PATH 统一在 .zshenv 中管理，此处只放非 PATH 环境变量
 # ============================================
-
-# 基础路径
-export PATH="${HOME}/.local/bin:${PATH}"
-export PATH="${HOME}/.cargo/bin:${PATH}"
-export PATH="${HOME}/.bun/bin:${PATH}"
-export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}"
-
-# Bun
-export BUN_INSTALL="${HOME}/.bun"
 
 # 编辑器
 export EDITOR="nvim"
@@ -25,8 +17,6 @@ export HOMEBREW_BUNDLE_FILE="${HOME}/.Brewfile"
 
 # 开发工具
 export RUST_BACKTRACE=1
-export GOPATH="${HOME}/go"
-export PATH="${GOPATH}/bin:${PATH}"
 export PYTHONDONTWRITEBYTECODE=1
 
 # 工具配置

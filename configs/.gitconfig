@@ -22,6 +22,18 @@
 [pull]
     rebase = false
 
+[merge]
+    conflictstyle = zdiff3
+
+[fetch]
+    prune = true
+
+[rerere]
+    enabled = true
+
+[diff]
+    algorithm = histogram
+
 [alias]
     st = status
     co = checkout

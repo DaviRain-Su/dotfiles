@@ -1,10 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "model": "opus[1m]",
-  "statusLine": {
-    "type": "command",
-    "command": "zsh ~/.claude/statusline-command.sh"
-  },
   "hooks": {
     "PreToolUse": [
       {
@@ -18,7 +14,12 @@
       }
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "zsh ~/.claude/statusline-command.sh"
+  },
   "enabledPlugins": {
     "rust-analyzer-lsp@claude-plugins-official": true
-  }
+  },
+  "skipDangerousModePermissionPrompt": true
 }

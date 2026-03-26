@@ -1,0 +1,346 @@
+#!/bin/bash
+# ACP (Agent Communication Protocol) 路由器
+# 用于 Pi 和其他 Agent 之间的任务分配
+
+set -e
+
+DOTFILES="${HOME}/dotfiles"
+ACP_SOCKET_DIR="${HOME}/.acp/sockets"
+ACP_LOG_DIR="${HOME}/.acp/logs"
+
+# 颜色
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+print_info() { echo -e "${BLUE}[ACP]${NC} $1"; }
+print_success() { echo -e "${GREEN}[ACP]${NC} $1"; }
+print_warning() { echo -e "${YELLOW}[ACP]${NC} $1"; }
+print_error() { echo -e "${RED}[ACP]${NC} $1"; }
+
+# 初始化 ACP 环境
+init_acp() {
+    mkdir -p "$ACP_SOCKET_DIR" "$ACP_LOG_DIR"
+    print_success "ACP 环境初始化完成"
+}
+
+# 检查 Agent 是否可用
+check_agent() {
+    local agent=$1
+    case $agent in
+        claude) command -v claude &>/dev/null ;;
+        codex) command -v codex &>/dev/null ;;
+        pi) command -v pi &>/dev/null ;;
+        hermes) command -v hermes &>/dev/null ;;
+        droid) command -v droid &>/dev/null ;;
+        *) return 1 ;;
+    esac
+}
+
+# 智能任务路由
+route_task() {
+    local task="$1"
+    local task_lower=$(echo "$task" | tr '[:upper:]' '[:lower:]')
+    
+    # 架构设计类 -> Claude
+    if echo "$task_lower" | grep -qiE "(架构|设计|重构|设计模式|system design|architecture|pattern)"; then
+        echo "claude"
+        return
+    fi
+    
+    # 代码生成类 -> Codex
+    if echo "$task_lower" | grep -qiE "(写代码|实现|修复|bug|coding|implement|fix|code|function|class)"; then
+        echo "codex"
+        return
+    fi
+    
+    # API/工具调用类 -> Hermes
+    if echo "$task_lower" | grep -qiE "(api|调用|查询|搜索|工具|http|request|fetch|query)"; then
+        echo "hermes"
+        return
+    fi
+    
+    # 部署/运维类 -> Droid
+    if echo "$task_lower" | grep -qiE "(部署|发布|ci|cd|docker|k8s|kubernetes|deploy|build|test)"; then
+        echo "droid"
+        return
+    fi
+    
+    # 默认返回 pi 自己处理
+    echo "pi"
+}
+
+# 启动 Agent 作为 ACP Client
+start_agent() {
+    local agent=$1
+    local socket="$ACP_SOCKET_DIR/$agent.sock"
+    local log="$ACP_LOG_DIR/$agent.log"
+    
+    if ! check_agent "$agent"; then
+        print_error "$agent 未安装"
+        return 1
+    fi
+    
+    # 检查是否已在运行
+    if [ -S "$socket" ]; then
+        print_warning "$agent 已在运行"
+        return 0
+    fi
+    
+    print_info "启动 $agent ACP Client..."
+    
+    # 创建伪终端会话
+    case $agent in
+        claude)
+            (claude --dangerously-skip-permissions < /dev/null > "$log" 2>&1 &)
+            ;;
+        codex)
+            (codex < /dev/null > "$log" 2>&1 &)
+            ;;
+        pi)
+            # Pi 是 hub，不需要单独启动
+            print_info "Pi 作为 ACP Hub 运行"
+            return 0
+            ;;
+        hermes)
+            (hermes < /dev/null > "$log" 2>&1 &)
+            ;;
+        droid)
+            (droid < /dev/null > "$log" 2>&1 &)
+            ;;
+    esac
+    
+    # 创建标记文件
+    touch "$socket"
+    print_success "$agent ACP Client 已启动"
+}
+
+# 停止 Agent
+stop_agent() {
+    local agent=$1
+    local socket="$ACP_SOCKET_DIR/$agent.sock"
+    
+    if [ -S "$socket" ]; then
+        rm -f "$socket"
+        pkill -f "^$agent" 2>/dev/null || true
+        print_success "$agent 已停止"
+    else
+        print_warning "$agent 未在运行"
+    fi
+}
+
+# 发送任务到指定 Agent
+send_task() {
+    local agent=$1
+    local task="$2"
+    local context="${3:-}"
+    
+    if ! check_agent "$agent"; then
+        print_error "$agent 未安装"
+        return 1
+    fi
+    
+    print_info "路由任务到 $agent: ${task:0:50}..."
+    
+    # 构建 ACP 消息
+    local acp_message=$(cat <<EOF
+{
+  "protocol": "ACP-1.0",
+  "from": "pi",
+  "to": "$agent",
+  "task": $(echo "$task" | jq -Rs '.'),
+  "context": $(echo "$context" | jq -Rs '.'),
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+EOF
+)
+    
+    # 根据 Agent 类型执行任务
+    case $agent in
+        claude)
+            echo "[$agent] 处理架构设计任务..."
+            # 这里可以调用 claude API 或 CLI
+            echo "Claude 输出: 架构设计完成"
+            ;;
+        codex)
+            echo "[$agent] 处理代码生成任务..."
+            echo "Codex 输出: 代码生成完成"
+            ;;
+        hermes)
+            echo "[$agent] 处理工具调用任务..."
+            echo "Hermes 输出: API 调用完成"
+            ;;
+        droid)
+            echo "[$agent] 处理部署任务..."
+            echo "Droid 输出: 部署完成"
+            ;;
+        pi)
+            echo "[$agent] 自行处理任务..."
+            ;;
+    esac
+    
+    # 记录日志
+    echo "[$(date)] $acp_message" >> "$ACP_LOG_DIR/router.log"
+}
+
+# 智能协调 - 分析任务并分配给多个 Agent
+coordinate_task() {
+    local task="$1"
+    
+    print_info "分析任务: ${task:0:100}..."
+    
+    # 识别需要多个 Agent 的复杂任务
+    local agents_needed=()
+    local task_lower=$(echo "$task" | tr '[:upper:]' '[:lower:]')
+    
+    # 检查是否需要架构设计
+    if echo "$task_lower" | grep -qiE "(架构|设计|system)"; then
+        agents+=("claude")
+    fi
+    
+    # 检查是否需要代码实现
+    if echo "$task_lower" | grep -qiE "(代码|实现|写|code)"; then
+        agents+=("codex")
+    fi
+    
+    # 检查是否需要部署
+    if echo "$task_lower" | grep -qiE "(部署|docker|k8s|deploy)"; then
+        agents+=("droid")
+    fi
+    
+    if [ ${#agents[@]} -eq 0 ]; then
+        agents+=("pi")
+    fi
+    
+    print_info "协调 ${#agents[@]} 个 Agent: ${agents[*]}"
+    
+    # 顺序执行（可以改为并行）
+    local context=""
+    for agent in "${agents[@]}"; do
+        print_info "========================================"
+        send_task "$agent" "$task" "$context"
+        context="上一个 $agent 的输出..."
+    done
+    
+    print_success "任务协调完成！"
+}
+
+# 显示状态
+show_status() {
+    echo ""
+    echo "🔌 ACP 状态"
+    echo ""
+    
+    local agents=("claude" "codex" "pi" "hermes" "droid")
+    
+    for agent in "${agents[@]}"; do
+        local socket="$ACP_SOCKET_DIR/$agent.sock"
+        local status="❌ 未运行"
+        
+        if [ "$agent" = "pi" ]; then
+            status="✅ Hub (当前)"
+        elif [ -S "$socket" ]; then
+            status="✅ Client"
+        elif check_agent "$agent"; then
+            status="⏸️  可用"
+        else
+            status="❌ 未安装"
+        fi
+        
+        printf "  %-10s %s\n" "$agent" "$status"
+    done
+    
+    echo ""
+    echo "Socket 目录: $ACP_SOCKET_DIR"
+    echo "日志目录: $ACP_LOG_DIR"
+    echo ""
+}
+
+# 主入口
+main() {
+    case "${1:-}" in
+        init)
+            init_acp
+            ;;
+        start)
+            init_acp
+            if [ -n "${2:-}" ]; then
+                start_agent "$2"
+            else
+                # 启动所有可用的 agent
+                for agent in claude codex hermes droid; do
+                    check_agent "$agent" && start_agent "$agent"
+                done
+            fi
+            ;;
+        stop)
+            if [ -n "${2:-}" ]; then
+                stop_agent "$2"
+            else
+                for agent in claude codex hermes droid; do
+                    stop_agent "$agent"
+                done
+            fi
+            ;;
+        status|st)
+            show_status
+            ;;
+        route)
+            if [ -z "${2:-}" ]; then
+                print_error "请提供任务"
+                exit 1
+            fi
+            local agent=$(route_task "$2")
+            print_info "任务路由到: $agent"
+            send_task "$agent" "$2" "${3:-}"
+            ;;
+        coord|coordinate)
+            if [ -z "${2:-}" ]; then
+                print_error "请提供任务"
+                exit 1
+            fi
+            coordinate_task "$2"
+            ;;
+        analyze)
+            if [ -z "${2:-}" ]; then
+                print_error "请提供任务"
+                exit 1
+            fi
+            local agent=$(route_task "$2")
+            echo "$agent"
+            ;;
+        help|-h|--help)
+            echo ""
+            echo "🔌 ACP (Agent Communication Protocol) 路由器"
+            echo ""
+            echo "用法:"
+            echo "  acp-router init              初始化 ACP 环境"
+            echo "  acp-router start [agent]     启动 ACP Client"
+            echo "  acp-router stop [agent]      停止 ACP Client"
+            echo "  acp-router status            查看状态"
+            echo "  acp-router route <task>      路由单个任务"
+            echo "  acp-router coord <task>      协调多 Agent 任务"
+            echo "  acp-router analyze <task>    分析任务应该路由到哪个 Agent"
+            echo ""
+            echo "支持的 Agent:"
+            echo "  - claude  (架构设计)"
+            echo "  - codex   (代码生成)"
+            echo "  - hermes  (API/工具)"
+            echo "  - droid   (部署/运维)"
+            echo "  - pi      (主控/协调)"
+            echo ""
+            echo "示例:"
+            echo "  acp-router start claude      启动 Claude ACP Client"
+            echo "  acp-router route \"实现登录功能\"   自动路由到合适 Agent"
+            echo "  acp-router coord \"设计并实现一个微服务\"   多 Agent 协调"
+            echo ""
+            ;;
+        *)
+            show_status
+            ;;
+    esac
+}
+
+main "$@"

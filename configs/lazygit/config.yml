@@ -1,0 +1,38 @@
+# ============================================
+# Lazygit 配置
+# ============================================
+
+gui:
+  showIcons: true
+  nerdFontsVersion: "3"
+  theme:
+    activeBorderColor:
+      - "#7aa2f7"  # Tokyo Night blue
+      - bold
+    inactiveBorderColor:
+      - "#565f89"  # Tokyo Night comment
+    selectedLineBgColor:
+      - "#283457"  # Tokyo Night visual
+    cherryPickedCommitFgColor:
+      - "#7dcfff"  # Tokyo Night cyan
+  showBottomLine: true
+  showCommandLog: false
+  border: rounded
+
+git:
+  paging:
+    colorArg: always
+    pager: delta --paging=never
+  merging:
+    manualCommit: false
+  log:
+    showGraph: always
+    order: topo-order
+
+os:
+  editPreset: nvim
+
+keybinding:
+  universal:
+    quit: q
+    return: <escape>

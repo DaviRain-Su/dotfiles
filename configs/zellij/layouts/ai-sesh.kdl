@@ -1,0 +1,14 @@
+// AI 编程分屏会话布局
+// 左侧 65%: AI Agent | 右侧 35%: lazygit
+// 用法: zellij --layout ~/.config/zellij/layouts/ai-sesh.kdl
+
+layout {
+    pane split_direction="vertical" {
+        pane size="65%" {
+            // AI agent 面板（手动启动 agent）
+        }
+        pane size="35%" command="lazygit" {
+            // Git 管理面板
+        }
+    }
+}

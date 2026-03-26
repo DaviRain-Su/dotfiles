@@ -99,6 +99,11 @@ alias aisd='ai sesh droid'             # Factory.ai + lazygit
 alias aispick='ai sesh pickup'         # 恢复最近会话
 alias aisls='ai sesh list'             # 列出活跃会话
 
+# Pi Messenger 多 Agent 协调
+alias pmsg='pi_messenger'              # Pi Messenger 快捷调用
+alias msg-crew='npx pi-messenger --crew-install'  # 查看可用 Crew Agents
+alias msg-status='echo "在 Pi 中运行: pi_messenger({ action: \"list\" })"'
+
 # ============================================
 # 快捷键速查表别名 (使用 glow 渲染 Markdown)
 # ============================================

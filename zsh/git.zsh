@@ -2,17 +2,6 @@
 # Git 配置
 # ============================================
 
-# 配置 git 使用 delta
-git config --global core.pager delta 2>/dev/null || true
-git config --global interactive.diffFilter 'delta --color-only' 2>/dev/null || true
-git config --global delta.navigate true 2>/dev/null || true
-git config --global delta.light false 2>/dev/null || true
-git config --global delta.side-by-side true 2>/dev/null || true
-
-# 其他 Git 配置
-git config --global init.defaultBranch main 2>/dev/null || true
-git config --global push.default simple 2>/dev/null || true
-
 # Git 别名
 alias gs='git status -sb'
 alias ga='git add'

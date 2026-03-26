@@ -1,0 +1,55 @@
+// ============================================
+// Zellij 配置
+// Tokyo Night 配色主题
+// ============================================
+
+// 默认模式
+default_mode "normal"
+
+// 鼠标支持
+mouse_mode true
+
+// 简化 UI
+simplified_ui true
+
+// 复制到系统剪贴板
+copy_on_select true
+copy_command "pbcopy"
+
+// 滚动缓冲区
+scroll_buffer_size 100000
+
+// 主题：Tokyo Night
+theme "tokyo-night"
+
+themes {
+    tokyo-night {
+        fg "#c0caf5"
+        bg "#1a1b26"
+        black "#15161e"
+        red "#f7768e"
+        green "#9ece6a"
+        yellow "#e0af68"
+        blue "#7aa2f7"
+        magenta "#bb9af7"
+        cyan "#7dcfff"
+        white "#a9b1d6"
+        orange "#ff9e64"
+    }
+}
+
+// 快捷键
+keybinds {
+    shared {
+        bind "Alt 1" { MoveFocus "Left"; }
+        bind "Alt 2" { MoveFocus "Right"; }
+        bind "Alt 3" { MoveFocus "Up"; }
+        bind "Alt 4" { MoveFocus "Down"; }
+    }
+}
+
+// 默认布局
+default_layout "compact"
+
+// 会话序列化（断线重连）
+session_serialization true
