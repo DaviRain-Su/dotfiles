@@ -78,6 +78,17 @@ alias finder='open -a Finder'
 alias flush='dscacheutil -flushcache && sudo killall -HUP mDNSResponder'
 
 # ============================================
+# AI Agent 快捷别名
+# ============================================
+alias ai='${DOTFILES}/bin/ai'
+alias aic='ai claude'
+alias aip='ai pi'
+alias aico='ai codex'
+alias aio='ai opencode'
+alias aih='ai hermes'
+alias ail='ai list'
+
+# ============================================
 # 快捷键速查表别名 (使用 glow 渲染 Markdown)
 # ============================================
 # 如果没有 glow，使用 bat 作为回退

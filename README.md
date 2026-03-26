@@ -20,6 +20,7 @@
 - **🍎 macOS 优化** - 系统设置脚本
 - **👻 [Ghostty](https://ghostty.org)** - 极速 GPU 加速终端
 - **🖥️ [Tmux](https://github.com/tmux/tmux)** - 会话持久化，多编辑器共享 Agent
+- **🤖 AI Agent 统一入口** - Claude, Codex, OpenCode, Pi, Hermes
 
 ## 📦 包含工具
 
@@ -504,6 +505,61 @@ tmux attach -t work
 - **快捷键**: 使用 `Ctrl+a` 代替 `Ctrl+b`
 - **鼠标**: 已启用
 - **颜色**: Tokyo Night 主题
+
+## 🤖 AI Agent 统一入口
+
+统一管理 Claude Code、Codex、OpenCode、Pi、Hermes 等 AI Agent。
+
+### 安装所有 Agent
+
+```bash
+ai install
+```
+
+### 查看已安装的 Agent
+
+```bash
+ai list
+```
+
+### 启动特定 Agent
+
+```bash
+ai claude       # 启动 Claude Code
+ai codex        # 启动 Codex
+ai opencode     # 启动 OpenCode
+ai pi           # 启动 Pi
+ai hermes       # 启动 Hermes
+```
+
+### 快捷别名
+
+```bash
+aic             # ai claude
+aip             # ai pi
+aico            # ai codex
+aio             # ai opencode
+aih             # ai hermes
+ail             # ai list
+```
+
+### 配置
+
+Agent 配置位于 `~/dotfiles/configs/agents/`：
+
+```
+configs/agents/
+├── claude/
+│   └── config.sh
+├── codex/
+│   └── config.sh
+├── opencode/
+│   └── config.sh
+├── pi/
+│   └── config.sh
+└── hermes/
+    └── config.sh
+```
 
 ## 🔄 更新
 
