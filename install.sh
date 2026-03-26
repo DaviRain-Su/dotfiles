@@ -153,6 +153,14 @@ install_dotfiles_rsync() {
     # 链接 zsh 配置
     ln -sf "${SCRIPT_DIR}/zsh/zshrc" ~/.zshrc
     
+    # 创建 .extra 文件（如果不存在）
+    if [ ! -f "$HOME/.extra" ]; then
+        if [ -f "${SCRIPT_DIR}/configs/.extra.example" ]; then
+            cp "${SCRIPT_DIR}/configs/.extra.example" "$HOME/.extra"
+            print_warning "已创建 ~/.extra 文件，请编辑它添加你的 API Keys 和个人配置"
+        fi
+    fi
+    
     # 链接 starship 配置
     mkdir -p ~/.config
     ln -sf "${SCRIPT_DIR}/configs/starship.toml" ~/.config/starship.toml
@@ -218,11 +226,21 @@ install_dotfiles_symlink() {
     fi
     
     # 其他配置文件
-    for file in .path .exports .aliases .functions .extra .curlrc .wgetrc .hushlogin; do
+    for file in .path .exports .aliases .functions .curlrc .wgetrc .hushlogin; do
         if [ -f "${SCRIPT_DIR}/configs/$file" ]; then
             ln -sf "${SCRIPT_DIR}/configs/$file" "$HOME/$file"
         fi
     done
+    
+    # .extra 文件特殊处理：从模板复制（不链接），因为它包含敏感信息
+    if [ ! -f "$HOME/.extra" ]; then
+        if [ -f "${SCRIPT_DIR}/configs/.extra.example" ]; then
+            cp "${SCRIPT_DIR}/configs/.extra.example" "$HOME/.extra"
+            print_warning "已创建 ~/.extra 文件，请编辑它添加你的 API Keys 和个人配置"
+        fi
+    else
+        print_info "~/.extra 已存在，保留当前配置"
+    fi
     
     print_success "dotfiles 安装完成"
 }

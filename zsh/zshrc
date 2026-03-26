@@ -29,5 +29,8 @@ source "${DOTFILES}/zsh/fzf.zsh"
 # 加载 Git 配置
 source "${DOTFILES}/zsh/git.zsh"
 
+# 加载本地额外配置（API Keys 等敏感信息）
+[[ -f "${HOME}/.extra" ]] && source "${HOME}/.extra"
+
 # 加载本地配置（如果存在）
 [[ -f "${HOME}/.zshrc.local" ]] && source "${HOME}/.zshrc.local"

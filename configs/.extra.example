@@ -1,0 +1,37 @@
+# ============================================
+# 本地额外配置模板 (configs/.extra.example)
+# ============================================
+# 此文件用于存放不想提交到 Git 的敏感信息
+# 例如：Git 用户名、API Keys、Token、工作相关配置等
+#
+# ⚠️ 使用方法：
+#   1. 复制此文件到 ~/.extra:  cp configs/.extra.example ~/.extra
+#   2. 编辑 ~/.extra，取消注释并填入你的真实配置
+#   3. 重新加载 zsh:  source ~/.zshrc
+#
+# 🔒 安全提示：
+#   - ~/.extra 已被 .gitignore 保护，不会被提交到 Git
+#   - 永远不要把真实的 API Keys 直接写在这个模板文件里
+#   - 永远不要把 ~/.extra 提交到 GitHub
+# ============================================
+
+# Git 配置（请取消注释并修改）
+# export GIT_AUTHOR_NAME="Your Name"
+# export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"
+# git config --global user.name "$GIT_AUTHOR_NAME"
+# export GIT_AUTHOR_EMAIL="your.email@example.com"
+# export GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"
+# git config --global user.email "$GIT_AUTHOR_EMAIL"
+
+# API Keys（请取消注释并填入真实的 key）
+# export OPENAI_API_KEY="your-api-key-here"
+# export ANTHROPIC_API_KEY="your-api-key-here"
+# export KIMI_API_KEY="your-api-key-here"
+# export GITHUB_TOKEN="your-token-here"
+
+# 工作目录（请取消注释并修改）
+# export WORK_DIR="$HOME/work"
+# export PROJECTS="$HOME/projects"
+
+# 其他个人配置
+# alias work="cd $WORK_DIR"

@@ -595,6 +595,54 @@ configs/agents/
 # Hermes: ~/.hermes/
 ```
 
+### 🔐 API Keys 配置（重要！）
+
+**⚠️ 安全警告**：永远不要把真实的 API Keys 直接提交到 Git！
+
+#### 正确的配置方式
+
+1. **安装时自动创建**：运行 `./install.sh` 会自动从模板创建 `~/.extra` 文件
+
+2. **手动创建**：
+   ```bash
+   cp ~/dotfiles/configs/.extra.example ~/.extra
+   ```
+
+3. **编辑 `~/.extra`**，填入你的真实 API Keys：
+   ```bash
+   # Git 配置
+   export GIT_AUTHOR_NAME="Your Name"
+   export GIT_AUTHOR_EMAIL="your.email@example.com"
+   git config --global user.name "$GIT_AUTHOR_NAME"
+   git config --global user.email "$GIT_AUTHOR_EMAIL"
+
+   # API Keys
+   export OPENAI_API_KEY="sk-..."
+   export ANTHROPIC_API_KEY="sk-ant-..."
+   export KIMI_API_KEY="..."
+   export GITHUB_TOKEN="ghp_..."
+   ```
+
+4. **重新加载配置**：
+   ```bash
+   source ~/.zshrc
+   ```
+
+#### 安全机制
+
+- ✅ `~/.extra` 已被添加到 `.gitignore`，不会被提交
+- ✅ `configs/.extra` 已从 Git 历史中移除
+- ✅ `configs/.extra.example` 是模板文件（所有 API Keys 都被注释）
+
+#### 支持的 API Keys
+
+| 变量名 | 用途 |
+|--------|------|
+| `OPENAI_API_KEY` | Codex, ChatGPT |
+| `ANTHROPIC_API_KEY` | Claude Code |
+| `KIMI_API_KEY` | Hermes (Moonshot) |
+| `GITHUB_TOKEN` | GitHub CLI, API 访问 |
+
 ## 🔄 更新
 
 ### 使用 setup.sh 更新
