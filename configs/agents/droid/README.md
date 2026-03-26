@@ -14,24 +14,25 @@ ai install
 
 安装完成后，CLI 命令为 `droid`。
 
-## 配置
+## 登录
 
-1. 从订阅邮件获取 API Key
-2. 添加到 `~/.extra`:
-   ```bash
-   export FACTORY_API_KEY="your-api-key"
-   ```
-3. 重新加载: `source ~/.zshrc`
+Factory.ai 使用浏览器登录（类似 Claude Code 和 Codex）：
+
+```bash
+droid login
+```
+
+会自动打开浏览器完成授权，无需配置 API Key。
 
 ## 使用
 
 ```bash
-droid login
-droid init
-droid deploy
+droid init      # 初始化项目
+droid deploy    # 部署
+droid --help    # 查看所有命令
 ```
 
 ## 文档
 
 - https://docs.factory.ai
-- https://factory.ai/settings/api
+- https://factory.ai
