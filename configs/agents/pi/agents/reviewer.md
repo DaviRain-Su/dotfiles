@@ -2,7 +2,7 @@
 name: reviewer
 description: 代码审查专家，验证实现并修复问题
 tools: read, grep, find, ls, bash
-model: kimi-k2.5
+model: k2p5
 thinking: high
 defaultReads: plan.md, progress.md
 defaultProgress: true

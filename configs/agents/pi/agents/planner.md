@@ -2,7 +2,7 @@
 name: planner
 description: 基于上下文和需求创建实现计划
 tools: read, grep, find, ls, write
-model: kimi-k2.5
+model: k2p5
 thinking: high
 output: plan.md
 defaultReads: context.md

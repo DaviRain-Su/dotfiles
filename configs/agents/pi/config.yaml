@@ -2,7 +2,7 @@
 # 默认使用 Kimi 模型
 
 # 模型配置
-model: kimi-k2.5
+model: k2p5
 provider: kimi-coding
 base_url: https://api.kimi.com/coding
 

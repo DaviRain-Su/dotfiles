@@ -2,7 +2,7 @@
 name: scout
 description: 快速代码探索，返回结构化上下文供后续 agent 使用
 tools: read, grep, find, ls, bash, write
-model: kimi-k2.5
+model: k2p5
 output: context.md
 defaultProgress: true
 ---

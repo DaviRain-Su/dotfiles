@@ -1,10 +1,10 @@
 {
   "crew": {
     "models": {
-      "planner": "kimi-coding/kimi-k2.5",
-      "worker": "kimi-coding/kimi-k2.5",
-      "reviewer": "kimi-coding/kimi-k2.5",
-      "analyst": "kimi-coding/kimi-k2.5"
+      "planner": "kimi-coding/k2p5",
+      "worker": "kimi-coding/k2p5",
+      "reviewer": "kimi-coding/k2p5",
+      "analyst": "kimi-coding/k2p5"
     }
   }
 }

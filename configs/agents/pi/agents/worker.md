@@ -1,7 +1,7 @@
 ---
 name: worker
 description: 通用实现 agent，拥有完整工具，隔离上下文
-model: kimi-k2.5
+model: k2p5
 defaultReads: context.md, plan.md
 defaultProgress: true
 ---
