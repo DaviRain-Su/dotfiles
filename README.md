@@ -19,6 +19,7 @@
 - **🔧 模块化配置** - 参考 keith/dotfiles 的模块化结构
 - **🍎 macOS 优化** - 系统设置脚本
 - **👻 [Ghostty](https://ghostty.org)** - 极速 GPU 加速终端
+- **🖥️ [Tmux](https://github.com/tmux/tmux)** - 会话持久化，多编辑器共享 Agent
 
 ## 📦 包含工具
 
@@ -404,6 +405,106 @@ theme = light:"GruvboxLight",dark:"Tokyo Night"
 brew install --cask font-hack-nerd-font
 ```
 
+## 🖥️ Tmux 配置（AI 开发专用）
+
+[Tmux](https://github.com/tmux/tmux) 是终端复用器，核心功能是**会话持久化**和**多终端共享**。
+
+### 为什么 AI 开发需要 Tmux？
+
+**场景：PyCharm + Ghostty 共享同一个 pi 实例**
+
+```
+PyCharm 终端 ──tmux attach──┐
+                             ├──► 同一个 pi 进程
+Ghostty ───────tmux attach──┘    (记忆自动同步!)
+```
+
+### 安装
+
+```bash
+brew install tmux
+```
+
+### 快速开始
+
+```bash
+# 创建新的 AI 开发会话
+tmux-ai myproject
+
+# 或者手动
+# 在 Ghostty 中:
+tmux new-session -s myproject
+pi
+
+# 在 PyCharm 终端中:
+tmux attach -t myproject
+# 现在两边看到的是同一个 pi！
+```
+
+### 核心快捷键
+
+Tmux 使用 `Ctrl+a` 作为前缀键（比默认 `Ctrl+b` 更好按）：
+
+#### 会话管理
+| 快捷键 | 功能 |
+|--------|------|
+| `Ctrl+a c` | 新建窗口 |
+| `Ctrl+a d` | detach（后台运行）|
+| `Ctrl+a s` | 选择会话 |
+| `Ctrl+a r` | 重命名会话 |
+
+#### 分屏导航（类似 Ghostty）
+| 快捷键 | 功能 |
+|--------|------|
+| `Ctrl+a \|` | 垂直分屏 |
+| `Ctrl+a -` | 水平分屏 |
+| `Ctrl+a h/j/k/l` | 切换分屏 |
+| `Ctrl+a q` | 关闭分屏 |
+
+#### 窗口切换（类似 Cmd+1..9）
+| 快捷键 | 功能 |
+|--------|------|
+| `Ctrl+a 1-9` | 切换到窗口 1-9 |
+| `Ctrl+a n` | 下一个窗口 |
+| `Ctrl+a p` | 上一个窗口 |
+
+### 常用命令
+
+```bash
+# 列出所有会话
+tmux ls
+
+# attach 到现有会话
+tmux attach -t myproject
+
+# 强制杀掉会话
+tmux kill-session -t myproject
+
+# 在 PyCharm 中查看共享的 pi 对话
+tmux attach -t myproject
+```
+
+### 会话持久化示例
+
+```bash
+# 1. 在办公室 Ghostty 中
+tmux new -s work
+pi
+> 正在帮我重构 auth 模块...
+Ctrl+a d  # detach，pi 继续在后台运行
+
+# 2. 回家后在 PyCharm 中
+tmux attach -t work
+> 继续之前的对话，pi 记得上下文！
+```
+
+### 配置文件
+
+- **主配置**: `~/dotfiles/configs/tmux/tmux.conf`
+- **快捷键**: 使用 `Ctrl+a` 代替 `Ctrl+b`
+- **鼠标**: 已启用
+- **颜色**: Tokyo Night 主题
+
 ## 🔄 更新
 
 ### 使用 setup.sh 更新
@@ -448,6 +549,8 @@ dotfiles/
 │   ├── ghostty/          # Ghostty 终端配置
 │   │   ├── config        # 主配置文件
 │   │   └── themes/       # 自定义主题
+│   ├── tmux/             # Tmux 配置
+│   │   └── tmux.conf     # Tmux 主配置
 │   └── .gitconfig        # Git 配置模板
 ├── zsh/                   # 模块化 zsh 配置 ⭐
 │   ├── zshrc             # 主入口

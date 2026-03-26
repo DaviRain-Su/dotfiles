@@ -192,6 +192,9 @@ install_dotfiles_symlink() {
     mkdir -p "$HOME/Library/Application Support/com.mitchellh.ghostty"
     ln -sf "${SCRIPT_DIR}/configs/ghostty/config" "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
     
+    # Tmux 配置
+    ln -sf "${SCRIPT_DIR}/configs/tmux/tmux.conf" "$HOME/.tmux.conf"
+    
     # 其他配置文件
     for file in .path .exports .aliases .functions .extra .curlrc .wgetrc .hushlogin; do
         if [ -f "${SCRIPT_DIR}/configs/$file" ]; then
