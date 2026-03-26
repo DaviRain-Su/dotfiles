@@ -225,6 +225,136 @@ launch_agent() {
     esac
 }
 
+# 启动分屏会话 (类似 sesh)
+launch_sesh() {
+    local tool="${1:-claude}"
+    tool="$(echo "$tool" | tr '[:upper:]' '[:lower:]')"
+    local dir="${2:-$(pwd)}"
+    
+    # 检查依赖
+    for dep in zellij lazygit; do
+        if ! command -v "$dep" &>/dev/null; then
+            print_error "'$dep' 未安装。运行: brew install $dep"
+            return 1
+        fi
+    done
+    
+    # 处理特殊命令
+    case "$tool" in
+        list|ls)
+            print_info "活跃会话列表:"
+            zellij list-sessions
+            return 0
+            ;;
+        pickup|attach)
+            local session
+            session="$(zellij list-sessions 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | head -1 | awk '{print $1}')"
+            if [[ -z "$session" ]]; then
+                print_error "没有活跃的会话"
+                return 1
+            fi
+            print_info "连接到会话: $session"
+            zellij attach "$session"
+            return 0
+            ;;
+    esac
+    
+    # 解析目录
+    dir="$(realpath "$dir" 2>/dev/null)" || {
+        print_error "无效目录: $2"
+        return 1
+    }
+    
+    # 构建命令块
+    local cmd_block=""
+    case "$tool" in
+        claude)
+            if ! check_agent "claude"; then
+                print_error "Claude Code 未安装"
+                return 1
+            fi
+            cmd_block="pane size=\"65%\" command=\"claude\" {
+                args \"--dangerously-skip-permissions\"
+                cwd \"$dir\"
+            }"
+            ;;
+        codex)
+            if ! check_agent "codex"; then
+                print_error "Codex 未安装"
+                return 1
+            fi
+            cmd_block="pane size=\"65%\" command=\"codex\" {
+                cwd \"$dir\"
+            }"
+            ;;
+        pi)
+            if ! check_agent "pi"; then
+                print_error "Pi 未安装"
+                return 1
+            fi
+            cmd_block="pane size=\"65%\" command=\"pi\" {
+                cwd \"$dir\"
+            }"
+            ;;
+        hermes)
+            if ! check_agent "hermes"; then
+                print_error "Hermes 未安装"
+                return 1
+            fi
+            cmd_block="pane size=\"65%\" command=\"hermes\" {
+                cwd \"$dir\"
+            }"
+            ;;
+        droid)
+            if ! check_agent "droid"; then
+                print_error "Factory.ai (droid) 未安装"
+                return 1
+            fi
+            cmd_block="pane size=\"65%\" command=\"droid\" {
+                cwd \"$dir\"
+            }"
+            ;;
+        *)
+            # 支持任意命令
+            if ! command -v "$tool" &>/dev/null; then
+                print_error "'$tool' 未安装或不在 PATH 中"
+                return 1
+            fi
+            cmd_block="pane size=\"65%\" command=\"$tool\" {
+                cwd \"$dir\"
+            }"
+            ;;
+    esac
+    
+    # 创建临时布局文件
+    local layout_dir
+    layout_dir="$(mktemp -d /tmp/ai-sesh-XXXXXX)"
+    local layout_file="$layout_dir/layout.kdl"
+    
+    cat > "$layout_file" <<EOF
+// AI 编程分屏会话 - 由 ai sesh 生成
+keybinds {
+    shared {
+        bind "Alt 1" { MoveFocus "left"; }
+        bind "Alt 2" { MoveFocus "right"; }
+        bind "Ctrl q" { Detach; }
+    }
+}
+layout {
+    pane split_direction="vertical" {
+        $cmd_block
+        pane size="35%" command="lazygit" {
+            cwd "$dir"
+        }
+    }
+}
+EOF
+    
+    print_info "启动分屏会话: $tool + lazygit"
+    zellij --layout "$layout_file"
+    rm -rf "$layout_dir"
+}
+
 # 主入口
 case "${1:-}" in
     list|ls|-l|--list)
@@ -233,6 +363,10 @@ case "${1:-}" in
     install|-i|--install)
         install_agents
         ;;
+    sesh|--sesh)
+        shift  # 移除 'sesh' 参数
+        launch_sesh "$@"
+        ;;
     claude|codex|opencode|pi|hermes|droid)
         launch_agent "$@"
         ;;
@@ -240,20 +374,29 @@ case "${1:-}" in
         echo ""
         echo "🤖 AI Agent 统一入口"
         echo ""
-        echo "用法:"
-        echo "  ai list          列出所有已安装的 agent"
-        echo "  ai install       安装所有 agent"
-        echo "  ai claude        启动 Claude Code"
-        echo "  ai codex         启动 Codex"
-        echo "  ai opencode      启动 OpenCode"
-        echo "  ai pi            启动 Pi"
-        echo "  ai hermes        启动 Hermes"
-        echo "  ai droid         启动 Factory.ai (droid)"
+        echo "基础命令:"
+        echo "  ai list              列出所有已安装的 agent"
+        echo "  ai install           安装所有 agent"
+        echo ""
+        echo "启动 Agent:"
+        echo "  ai claude            启动 Claude Code"
+        echo "  ai codex             启动 Codex"
+        echo "  ai opencode          启动 OpenCode"
+        echo "  ai pi                启动 Pi"
+        echo "  ai hermes            启动 Hermes"
+        echo "  ai droid             启动 Factory.ai (droid)"
+        echo ""
+        echo "分屏会话 (AI + lazygit):"
+        echo "  ai sesh              启动 Claude + lazygit 分屏"
+        echo "  ai sesh codex        启动 Codex + lazygit 分屏"
+        echo "  ai sesh pi ~/project 启动 Pi + lazygit，指定目录"
+        echo "  ai sesh list         列出活跃会话"
+        echo "  ai sesh pickup       恢复最近会话"
         echo ""
         echo "示例:"
-        echo "  ai claude        启动 Claude Code"
-        echo "  ai pi            启动 Pi"
-        echo "  ai droid         启动 Factory.ai (droid)"
+        echo "  ai claude            启动 Claude Code"
+        echo "  ai sesh              分屏模式: Claude + lazygit"
+        echo "  ai sesh droid        分屏模式: Factory.ai + lazygit"
         echo ""
         ;;
     *)

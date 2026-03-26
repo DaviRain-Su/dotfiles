@@ -89,6 +89,16 @@ alias aih='ai hermes'
 alias aid='ai droid'
 alias ail='ai list'
 
+# AI 分屏会话 (类似 sesh - AI + lazygit)
+alias ais='ai sesh'                    # 默认 Claude + lazygit
+alias aisc='ai sesh claude'            # Claude + lazygit
+alias aisp='ai sesh pi'                # Pi + lazygit
+alias aisco='ai sesh codex'            # Codex + lazygit
+alias aish='ai sesh hermes'            # Hermes + lazygit
+alias aisd='ai sesh droid'             # Factory.ai + lazygit
+alias aispick='ai sesh pickup'         # 恢复最近会话
+alias aisls='ai sesh list'             # 列出活跃会话
+
 # ============================================
 # 快捷键速查表别名 (使用 glow 渲染 Markdown)
 # ============================================

@@ -584,6 +584,63 @@ configs/agents/
 - **Display**: 流式输出、工具进度显示
 - **Memory**: 启用用户画像和记忆功能
 
+### 分屏会话模式（AI + lazygit）
+
+参考 [sesh](https://github.com/almonk/sesh) 的工作流，一键启动 AI 编程分屏环境：
+
+```
+┌─────────────────────────────┬──────────────┐
+│                             │              │
+│   Claude/Codex/Pi/Hermes    │   lazygit    │
+│         (65%)               │    (35%)     │
+│                             │              │
+└─────────────────────────────┴──────────────┘
+```
+
+**特点：**
+- 左屏运行 AI 工具，右屏运行 lazygit
+- 会话持久化（通过 Zellij），支持断线重连
+- 快捷键 `Alt+1/2` 快速切换左右屏
+- 支持任意 AI 工具组合
+
+#### 启动分屏会话
+
+```bash
+ai sesh                    # 默认 Claude + lazygit
+ai sesh codex              # Codex + lazygit
+ai sesh pi ~/my-project    # Pi + lazygit，指定目录
+ai sesh droid              # Factory.ai + lazygit
+ai sesh vim ~/project      # 任意命令 + lazygit
+```
+
+#### 会话管理
+
+```bash
+ai sesh list               # 列出活跃会话
+ai sesh pickup             # 恢复最近的会话
+```
+
+#### 快捷别名
+
+```bash
+ais        # ai sesh (默认 Claude)
+aisc       # ai sesh claude
+aisp       # ai sesh pi
+aisco      # ai sesh codex
+aish       # ai sesh hermes
+aisd       # ai sesh droid
+aispick    # ai sesh pickup
+aisls      # ai sesh list
+```
+
+#### 快捷键（分屏模式内）
+
+| 快捷键 | 功能 |
+|--------|------|
+| `Alt + 1` | 聚焦左屏（AI 工具）|
+| `Alt + 2` | 聚焦右屏（lazygit）|
+| `Ctrl + Q` | 分离会话（后台运行）|
+
 ### 自定义配置
 
 如需修改配置，编辑 `~/dotfiles/configs/agents/<agent>/` 下的文件，然后运行：
