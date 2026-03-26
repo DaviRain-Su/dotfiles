@@ -36,6 +36,7 @@ brew "sd"          # sed 替代
 brew "choose"      # cut 替代
 brew "just"        # make 替代
 brew "glow"        # Markdown 终端渲染
+brew "prek"        # pre-commit 的 Rust 替代，快 7x
 
 # 开发语言
 brew "node"
