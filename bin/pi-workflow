@@ -1,0 +1,378 @@
+#!/bin/bash
+# Pi 工作流: Claude(设计) → Codex(实现) → Pi Review
+# 用法: pi-workflow "任务描述"
+
+set -e
+
+# 颜色
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+NC='\033[0m'
+
+print_header() { echo -e "${PURPLE}═══════════════════════════════════════════════════════════════${NC}"; }
+print_title() { echo -e "${PURPLE}  $1${NC}"; }
+print_info() { echo -e "${BLUE}[Workflow]${NC} $1"; }
+print_success() { echo -e "${GREEN}[✓]${NC} $1"; }
+print_warning() { echo -e "${YELLOW}[!]${NC} $1"; }
+print_error() { echo -e "${RED}[✗]${NC} $1"; }
+print_stage() { echo -e "${PURPLE}[Stage $1]${NC} $2"; }
+
+# 检查依赖
+check_deps() {
+    local missing=()
+    
+    if ! command -v claude &> /dev/null; then
+        missing+=("claude")
+    fi
+    
+    if ! command -v codex &> /dev/null; then
+        missing+=("codex")
+    fi
+    
+    if ! command -v pi &> /dev/null; then
+        missing+=("pi")
+    fi
+    
+    if [ ${#missing[@]} -gt 0 ]; then
+        print_error "缺少依赖: ${missing[*]}"
+        print_info "请先安装:"
+        print_info "  npm install -g @anthropic-ai/claude-code"
+        print_info "  npm install -g @openai/codex"
+        print_info "  npm install -g @mariozechner/pi-coding-agent"
+        exit 1
+    fi
+}
+
+# 创建工作目录
+setup_workspace() {
+    local timestamp=$(date +%Y%m%d_%H%M%S)
+    WORKFLOW_DIR=".pi/workflow/${timestamp}"
+    mkdir -p "$WORKFLOW_DIR"
+    
+    print_info "工作目录: $WORKFLOW_DIR"
+    echo "$TASK" > "$WORKFLOW_DIR/TASK.txt"
+}
+
+# Stage 1: Claude 设计
+stage1_design() {
+    print_header
+    print_title "Stage 1/3: Claude 设计"
+    print_header
+    echo ""
+    
+    local output_file="$WORKFLOW_DIR/01_design.md"
+    
+    print_info "任务: $TASK"
+    print_info "输出: $output_file"
+    echo ""
+    
+    # 创建 Claude 提示
+    local prompt=$(cat <<EOF
+你是一个系统架构师。请为以下任务设计详细的技术方案：
+
+任务: $TASK
+
+请提供:
+1. 系统架构设计
+2. 核心组件和接口
+3. 数据模型
+4. 实现步骤
+5. 技术选型建议
+
+输出格式: Markdown
+EOF
+)
+    
+    print_stage "1" "调用 Claude Code..."
+    echo ""
+    
+    # 调用 Claude
+    if echo "$prompt" | claude --dangerously-skip-permissions 2>&1 | tee "$output_file"; then
+        echo ""
+        print_success "Claude 设计完成"
+        print_info "输出文件: $output_file"
+        print_info "文件大小: $(wc -c < "$output_file") 字节"
+        return 0
+    else
+        print_error "Claude 执行失败"
+        return 1
+    fi
+}
+
+# Stage 2: Codex 实现
+stage2_implement() {
+    print_header
+    print_title "Stage 2/3: Codex 实现"
+    print_header
+    echo ""
+    
+    local design_file="$WORKFLOW_DIR/01_design.md"
+    local output_dir="$WORKFLOW_DIR/02_implementation"
+    local output_file="$WORKFLOW_DIR/02_implementation.md"
+    
+    mkdir -p "$output_dir"
+    
+    print_info "输入设计: $design_file"
+    print_info "输出目录: $output_dir"
+    echo ""
+    
+    # 创建 Codex 提示
+    local prompt=$(cat <<EOF
+你是一个代码实现专家。请基于以下设计文档实现代码：
+
+## 原始任务
+$(cat "$WORKFLOW_DIR/TASK.txt")
+
+## 设计文档
+$(cat "$design_file")
+
+请:
+1. 根据设计实现完整的代码
+2. 包含必要的配置文件
+3. 添加基础测试
+4. 代码要可运行
+
+在实现过程中，如果需要创建文件，请使用 write 工具。
+EOF
+)
+    
+    print_stage "2" "调用 Codex..."
+    echo ""
+    
+    # 调用 Codex
+    if echo "$prompt" | codex 2>&1 | tee "$output_file"; then
+        echo ""
+        print_success "Codex 实现完成"
+        print_info "输出文件: $output_file"
+        print_info "文件大小: $(wc -c < "$output_file") 字节"
+        return 0
+    else
+        print_error "Codex 执行失败"
+        return 1
+    fi
+}
+
+# Stage 3: Pi Review
+stage3_review() {
+    print_header
+    print_title "Stage 3/3: Pi Review"
+    print_header
+    echo ""
+    
+    local design_file="$WORKFLOW_DIR/01_design.md"
+    local impl_file="$WORKFLOW_DIR/02_implementation.md"
+    local output_file="$WORKFLOW_DIR/03_review.md"
+    
+    print_info "设计文档: $design_file"
+    print_info "实现文档: $impl_file"
+    print_info "审查输出: $output_file"
+    echo ""
+    
+    # 创建 Review 提示
+    local review_prompt=$(cat <<EOF
+你是一个代码审查专家。请审查以下设计和实现：
+
+## 原始任务
+$(cat "$WORKFLOW_DIR/TASK.txt")
+
+## 设计文档
+$(cat "$design_file")
+
+## 实现文档
+$(cat "$impl_file")
+
+请提供:
+1. 设计是否符合需求
+2. 实现是否符合设计
+3. 代码质量问题
+4. 安全性评估
+5. 改进建议
+6. 总体评价 (优秀/良好/需改进)
+
+输出格式: Markdown
+EOF
+)
+    
+    print_stage "3" "生成审查报告..."
+    echo ""
+    
+    # 保存 review prompt
+    echo "$review_prompt" > "$WORKFLOW_DIR/03_review_prompt.md"
+    
+    print_info "Review prompt 已保存到: $WORKFLOW_DIR/03_review_prompt.md"
+    print_info "请在 Pi 中运行:"
+    print_info "  read $WORKFLOW_DIR/03_review_prompt.md"
+    print_info "  然后让 Pi 进行审查"
+    echo ""
+    
+    # 简单审查总结
+    cat > "$output_file" <<EOF
+# 代码审查报告
+
+## 审查信息
+- 任务: $TASK
+- 时间: $(date)
+- 工作流目录: $WORKFLOW_DIR
+
+## 文件清单
+- [设计文档](01_design.md)
+- [实现文档](02_implementation.md)
+
+## 建议审查点
+1. 设计是否完整覆盖了需求？
+2. 实现是否符合设计？
+3. 代码质量如何？
+4. 是否有安全隐患？
+
+## 下一步
+请在 Pi 中加载 03_review_prompt.md，让 Pi 进行详细审查。
+
+或者运行: pi-review $WORKFLOW_DIR
+EOF
+    
+    print_success "Review 框架已生成"
+    return 0
+}
+
+# 生成最终报告
+generate_report() {
+    print_header
+    print_title "工作流完成报告"
+    print_header
+    echo ""
+    
+    local report_file="$WORKFLOW_DIR/README.md"
+    
+    cat > "$report_file" <<EOF
+# Pi 工作流执行报告
+
+## 基本信息
+- 任务: $TASK
+- 执行时间: $(date)
+- 工作目录: $WORKFLOW_DIR
+
+## 执行阶段
+
+### Stage 1: 设计 ✓
+- 工具: Claude Code
+- 输出: [01_design.md](01_design.md)
+- 状态: 完成
+- 大小: $(wc -c < "$WORKFLOW_DIR/01_design.md") 字节
+
+### Stage 2: 实现 ✓
+- 工具: Codex
+- 输出: [02_implementation.md](02_implementation.md)
+- 状态: 完成
+- 大小: $(wc -c < "$WORKFLOW_DIR/02_implementation.md") 字节
+
+### Stage 3: 审查 ○
+- 工具: Pi
+- 输出: [03_review.md](03_review.md)
+- 状态: 待人工审查
+
+## 快速查看
+
+\`\`\`bash
+# 查看设计
+read $WORKFLOW_DIR/01_design.md
+
+# 查看实现
+read $WORKFLOW_DIR/02_implementation.md
+
+# 查看审查
+read $WORKFLOW_DIR/03_review.md
+\`\`\`
+
+## 文件结构
+
+\`\`\`
+$WORKFLOW_DIR/
+├── 01_design.md           # Claude 设计
+├── 02_implementation.md   # Codex 实现
+├── 03_review.md          # Pi 审查框架
+├── 03_review_prompt.md   # Pi Review 提示词
+├── TASK.txt              # 原始任务
+└── README.md             # 本文件
+\`\`\`
+
+## 下一步建议
+
+1. 在 Pi 中查看设计文档
+2. 检查实现是否符合预期
+3. 运行 Pi Review 进行代码审查
+4. 根据审查结果决定是否修改
+
+EOF
+    
+    print_success "报告已生成: $report_file"
+    echo ""
+    print_info "快速查看:"
+    print_info "  read $report_file"
+    print_info "  read $WORKFLOW_DIR/01_design.md"
+    print_info "  read $WORKFLOW_DIR/02_implementation.md"
+    echo ""
+}
+
+# 主函数
+main() {
+    # 检查参数
+    if [ -z "$1" ]; then
+        print_error "请提供任务描述"
+        echo ""
+        echo "用法: pi-workflow \"任务描述\""
+        echo ""
+        echo "示例:"
+        echo '  pi-workflow "开发用户认证系统"'
+        echo '  pi-workflow "实现一个 REST API"'
+        echo '  pi-workflow "重构登录模块"'
+        exit 1
+    fi
+    
+    TASK="$1"
+    
+    print_header
+    print_title "Pi 工作流: Claude → Codex → Pi Review"
+    print_title "任务: $TASK"
+    print_header
+    echo ""
+    
+    # 检查依赖
+    check_deps
+    
+    # 设置工作目录
+    setup_workspace
+    
+    # Stage 1: 设计
+    if ! stage1_design; then
+        print_error "Stage 1 失败"
+        exit 1
+    fi
+    
+    # Stage 2: 实现
+    if ! stage2_implement; then
+        print_error "Stage 2 失败"
+        exit 1
+    fi
+    
+    # Stage 3: 审查
+    stage3_review
+    
+    # 生成报告
+    generate_report
+    
+    print_header
+    print_title "工作流全部完成！"
+    print_header
+    echo ""
+    print_info "工作目录: $WORKFLOW_DIR"
+    print_info ""
+    print_info "建议操作:"
+    print_info "  cd $WORKFLOW_DIR"
+    print_info "  cat README.md"
+    echo ""
+}
+
+main "$@"

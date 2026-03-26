@@ -108,6 +108,10 @@ alias msg-status='echo "在 Pi 中运行: pi_messenger({ action: \"list\" })"'
 alias orch='pi-orchestrator'           # Orchestrator 简写
 alias orch-list='pi-orchestrator list' # 列出可用 Agent
 
+# Pi Workflow - 三阶段工作流 (Claude → Codex → Pi Review)
+alias pflow='pi-workflow'              # 工作流简写
+alias pf='pi-workflow'                 # 更短的别名
+
 # ============================================
 # 快捷键速查表别名 (使用 glow 渲染 Markdown)
 # ============================================
