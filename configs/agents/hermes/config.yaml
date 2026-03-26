@@ -1,7 +1,7 @@
 _config_version: 10
 
-[global]
-log_level = 'info'
+global:
+  log_level: 'info'
 
 agent:
   max_turns: 60
@@ -43,7 +43,7 @@ display:
 model:
   default: kimi-k2.5
   provider: kimi-coding
-  base_url: https://api.moonshot.ai/v1
+  base_url: https://api.kimi.com/coding
 
 # 内存配置
 memory:
