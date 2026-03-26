@@ -51,9 +51,13 @@ link:
         ln -sf {{DOTFILES}}/configs/zellij/config.kdl ~/.config/zellij/config.kdl
     } || true
 
-    # Pi (pi-messenger Crew 配置)
-    mkdir -p ~/.pi/agent
+    # Pi
+    mkdir -p ~/.config/pi ~/.pi/agent/agents
+    ln -sf {{DOTFILES}}/configs/agents/pi/config.yaml ~/.config/pi/config.yaml
     ln -sf {{DOTFILES}}/configs/agents/pi/pi-messenger.json ~/.pi/agent/pi-messenger.json
+    for f in {{DOTFILES}}/configs/agents/pi/agents/*.md; do
+        ln -sf "$f" ~/.pi/agent/agents/$(basename "$f")
+    done
 
     echo "✓ 符号链接已更新"
 
