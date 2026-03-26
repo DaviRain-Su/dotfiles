@@ -76,3 +76,12 @@ alias chrome='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome'
 alias safari='open -a Safari'
 alias finder='open -a Finder'
 alias flush='dscacheutil -flushcache && sudo killall -HUP mDNSResponder'
+
+# ============================================
+# 快捷键速查表别名
+# ============================================
+alias cheat='cat ~/dotfiles/CHEATSHEET.md | less'
+alias quick='cat ~/dotfiles/QUICKREF.md'
+alias keys='cat ~/dotfiles/CHEATSHEET.md | grep -A 20 "## 👻 Ghostty"'
+alias tmux-help='cat ~/dotfiles/CHEATSHEET.md | grep -A 30 "## 🖥️ Tmux"'
+alias pi-help='cat ~/dotfiles/CHEATSHEET.md | grep -A 40 "## 🤖 pi"'
