@@ -78,10 +78,20 @@ alias finder='open -a Finder'
 alias flush='dscacheutil -flushcache && sudo killall -HUP mDNSResponder'
 
 # ============================================
-# 快捷键速查表别名
+# 快捷键速查表别名 (使用 glow 渲染 Markdown)
 # ============================================
-alias cheat='cat ~/dotfiles/CHEATSHEET.md | less'
-alias quick='cat ~/dotfiles/QUICKREF.md'
-alias keys='cat ~/dotfiles/CHEATSHEET.md | grep -A 20 "## 👻 Ghostty"'
-alias tmux-help='cat ~/dotfiles/CHEATSHEET.md | grep -A 30 "## 🖥️ Tmux"'
-alias pi-help='cat ~/dotfiles/CHEATSHEET.md | grep -A 40 "## 🤖 pi"'
+# 如果没有 glow，使用 bat 作为回退
+if command -v glow &> /dev/null; then
+    alias cheat='glow ~/dotfiles/CHEATSHEET.md'
+    alias quick='glow ~/dotfiles/QUICKREF.md'
+    alias keys='glow ~/dotfiles/CHEATSHEET.md -p | grep -A 20 "## 👻 Ghostty" | glow -'
+    alias tmux-help='glow ~/dotfiles/CHEATSHEET.md -p | grep -A 30 "## 🖥️ Tmux" | glow -'
+    alias pi-help='glow ~/dotfiles/CHEATSHEET.md -p | grep -A 40 "## 🤖 pi" | glow -'
+else
+    # 回退到 bat（带语法高亮）
+    alias cheat='bat ~/dotfiles/CHEATSHEET.md'
+    alias quick='bat ~/dotfiles/QUICKREF.md'
+    alias keys='bat ~/dotfiles/CHEATSHEET.md | grep -A 20 "## 👻 Ghostty"'
+    alias tmux-help='bat ~/dotfiles/CHEATSHEET.md | grep -A 30 "## 🖥️ Tmux"'
+    alias pi-help='bat ~/dotfiles/CHEATSHEET.md | grep -A 40 "## 🤖 pi"'
+fi
