@@ -104,6 +104,10 @@ alias pmsg='pi_messenger'              # Pi Messenger 快捷调用
 alias msg-crew='npx pi-messenger --crew-install'  # 查看可用 Crew Agents
 alias msg-status='echo "在 Pi 中运行: pi_messenger({ action: \"list\" })"'
 
+# Pi Orchestrator - 简单 Agent 调用
+alias orch='pi-orchestrator'           # Orchestrator 简写
+alias orch-list='pi-orchestrator list' # 列出可用 Agent
+
 # ============================================
 # 快捷键速查表别名 (使用 glow 渲染 Markdown)
 # ============================================

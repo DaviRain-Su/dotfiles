@@ -1,0 +1,430 @@
+#!/bin/bash
+# Pi 主控 Orchestrator - 简单的 Agent 调用和 Review 工作流
+# 用法: 在 Pi 中调用这个脚本
+
+set -e
+
+DOTFILES="${HOME}/dotfiles"
+WORK_DIR="${PWD}"
+LOG_DIR="${HOME}/.pi/orchestrator/logs"
+RESULTS_DIR="${HOME}/.pi/orchestrator/results"
+
+# 颜色
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+NC='\033[0m'
+
+print_header() { echo -e "${PURPLE}═══════════════════════════════════════════════════════════════${NC}"; }
+print_title() { echo -e "${PURPLE}  $1${NC}"; }
+print_info() { echo -e "${BLUE}[Pi]${NC} $1"; }
+print_success() { echo -e "${GREEN}[✓]${NC} $1"; }
+print_warning() { echo -e "${YELLOW}[!]${NC} $1"; }
+print_error() { echo -e "${RED}[✗]${NC} $1"; }
+print_agent() { echo -e "${PURPLE}[$1]${NC} $2"; }
+
+# 初始化
+init() {
+    mkdir -p "$LOG_DIR" "$RESULTS_DIR"
+}
+
+# 检查 Agent 是否可用
+check_agent() {
+    case $1 in
+        claude) command -v claude &>/dev/null ;;
+        codex) command -v codex &>/dev/null ;;
+        pi) command -v pi &>/dev/null ;;
+        hermes) command -v hermes &>/dev/null ;;
+        droid) command -v droid &>/dev/null ;;
+        *) return 1 ;;
+    esac
+}
+
+# 获取 Agent 的友好名称
+agent_name() {
+    case $1 in
+        claude) echo "Claude Code" ;;
+        codex) echo "OpenAI Codex" ;;
+        pi) echo "Pi" ;;
+        hermes) echo "Hermes" ;;
+        droid) echo "Factory.ai" ;;
+        *) echo "$1" ;;
+    esac
+}
+
+# 运行 Agent 并捕获输出
+run_agent() {
+    local agent=$1
+    local task=$2
+    local output_file=$3
+    
+    print_header
+    print_title "Stage 1: 委派给 $(agent_name $agent)"
+    print_header
+    echo ""
+    
+    if ! check_agent "$agent"; then
+        print_error "$(agent_name $agent) 未安装"
+        return 1
+    fi
+    
+    print_info "任务: $task"
+    print_info "输出: $output_file"
+    echo ""
+    
+    # 创建临时脚本运行 Agent
+    local temp_script=$(mktemp /tmp/pi-orchestrator-XXXXXX.sh)
+    
+    case $agent in
+        claude)
+            cat > "$temp_script" << 'SCRIPT'
+#!/bin/bash
+cd "$PWD"
+# 将任务写入文件供 Claude 读取
+echo "$TASK" > /tmp/pi_task.txt
+claude --dangerously-skip-permissions < /tmp/pi_task.txt
+SCRIPT
+            ;;
+        codex)
+            cat > "$temp_script" << 'SCRIPT'
+#!/bin/bash
+cd "$PWD"
+echo "$TASK" | codex
+SCRIPT
+            ;;
+        pi)
+            # Pi 调用其他 Pi 实例（简化版，实际可能需要不同配置）
+            cat > "$temp_script" << 'SCRIPT'
+#!/bin/bash
+cd "$PWD"
+echo "Pi 子任务: $TASK"
+# 这里可以调用 pi 的特殊模式
+SCRIPT
+            ;;
+        hermes)
+            cat > "$temp_script" << 'SCRIPT'
+#!/bin/bash
+cd "$PWD"
+echo "$TASK" | hermes
+SCRIPT
+            ;;
+        droid)
+            cat > "$temp_script" << 'SCRIPT'
+#!/bin/bash
+cd "$PWD"
+echo "$TASK" | droid
+SCRIPT
+            ;;
+    esac
+    
+    chmod +x "$temp_script"
+    
+    # 运行并捕获输出
+    print_agent "$agent" "开始执行任务..."
+    echo ""
+    
+    if "$temp_script" 2>&1 | tee "$output_file"; then
+        echo ""
+        print_success "$(agent_name $agent) 任务完成"
+        rm -f "$temp_script"
+        return 0
+    else
+        echo ""
+        print_error "$(agent_name $agent) 任务失败"
+        rm -f "$temp_script"
+        return 1
+    fi
+}
+
+# Review 阶段 - Pi 检查输出
+review_stage() {
+    local agent=$1
+    local output_file=$2
+    
+    print_header
+    print_title "Stage 2: Pi Review"
+    print_header
+    echo ""
+    
+    print_info "正在审查 $(agent_name $agent) 的输出..."
+    print_info "文件: $output_file"
+    echo ""
+    
+    # 显示输出摘要
+    local lines=$(wc -l < "$output_file")
+    local chars=$(wc -c < "$output_file")
+    
+    print_info "输出统计:"
+    print_info "  - 行数: $lines"
+    print_info "  - 字符数: $chars"
+    print_info "  - 文件: $output_file"
+    echo ""
+    
+    # 检查是否有错误
+    if grep -qi "error\|exception\|failed\|fail" "$output_file" 2>/dev/null; then
+        print_warning "⚠️  检测到可能的错误关键词"
+    fi
+    
+    # 检查是否有 TODO
+    if grep -qi "todo\|fixme\|hack" "$output_file" 2>/dev/null; then
+        print_warning "⚠️  检测到 TODO/FIXME 标记"
+    fi
+    
+    echo ""
+    print_success "Review 准备完成"
+    echo ""
+    print_info "你可以在 Pi 中运行:"
+    print_info "  read $(basename $output_file)"
+    print_info "  然后进行人工 Review"
+}
+
+# 简单工作流：Pi -> Agent -> Review
+simple_workflow() {
+    local agent=$1
+    local task=$2
+    local timestamp=$(date +%Y%m%d_%H%M%S)
+    local output_file="$RESULTS_DIR/${agent}_${timestamp}.md"
+    
+    print_header
+    print_title "简单工作流: Pi → $(agent_name $agent) → Review"
+    print_header
+    echo ""
+    print_info "工作目录: $WORK_DIR"
+    echo ""
+    
+    # Stage 1: 委派
+    if ! run_agent "$agent" "$task" "$output_file"; then
+        return 1
+    fi
+    
+    echo ""
+    
+    # Stage 2: Review
+    review_stage "$agent" "$output_file"
+    
+    # 显示总结
+    echo ""
+    print_header
+    print_title "工作流完成"
+    print_header
+    echo ""
+    print_info "输出文件: $output_file"
+    print_info ""
+    print_info "下一步建议:"
+    print_info "  1. 在 Pi 中查看: read $output_file"
+    print_info "  2. 如果满意: 接受结果"
+    print_info "  3. 如果不满意: 重新运行或修改任务描述"
+}
+
+# 并行工作流：Pi -> [多个 Agent] -> Review
+parallel_workflow() {
+    local task=$2
+    local timestamp=$(date +%Y%m%d_%H%M%S)
+    
+    # 解析要运行的 agents
+    local agents=()
+    for arg in "$@"; do
+        if check_agent "$arg" 2>/dev/null; then
+            agents+=("$arg")
+        fi
+    done
+    
+    if [ ${#agents[@]} -eq 0 ]; then
+        print_error "请指定至少一个 Agent"
+        return 1
+    fi
+    
+    print_header
+    print_title "并行工作流: Pi → [${agents[*]}] → Review"
+    print_header
+    echo ""
+    print_info "将同时委派给 ${#agents[@]} 个 Agent"
+    echo ""
+    
+    local output_files=()
+    local pids=()
+    
+    # 并行启动所有 Agent
+    for agent in "${agents[@]}"; do
+        local output_file="$RESULTS_DIR/${agent}_${timestamp}.md"
+        output_files+=("$output_file")
+        
+        print_info "启动 $(agent_name $agent)..."
+        run_agent "$agent" "$task" "$output_file" &
+        pids+=($!)
+    done
+    
+    # 等待所有 Agent 完成
+    print_info "等待所有 Agent 完成..."
+    local failed=0
+    for i in "${!pids[@]}"; do
+        if ! wait "${pids[$i]}"; then
+            print_error "${agents[$i]} 失败"
+            failed=1
+        fi
+    done
+    
+    if [ $failed -eq 1 ]; then
+        return 1
+    fi
+    
+    # Review 所有输出
+    echo ""
+    print_header
+    print_title "Review 所有输出"
+    print_header
+    echo ""
+    
+    for i in "${!output_files[@]}"; do
+        review_stage "${agents[$i]}" "${output_files[$i]}"
+        echo ""
+    done
+    
+    print_success "并行工作流完成"
+}
+
+# 链式工作流：Pi -> Agent1 -> Agent2 -> Review
+chain_workflow() {
+    local agent1=$1
+    local agent2=$2
+    local task=$3
+    local timestamp=$(date +%Y%m%d_%H%M%S)
+    local output1="$RESULTS_DIR/${agent1}_${timestamp}_step1.md"
+    local output2="$RESULTS_DIR/${agent2}_${timestamp}_step2.md"
+    
+    print_header
+    print_title "链式工作流: Pi → $(agent_name $agent1) → $(agent_name $agent2) → Review"
+    print_header
+    echo ""
+    
+    # Step 1
+    print_info "Step 1: $(agent_name $agent1)"
+    if ! run_agent "$agent1" "$task" "$output1"; then
+        return 1
+    fi
+    
+    echo ""
+    
+    # Step 2: 使用 Step 1 的输出作为上下文
+    local task2="基于以下结果继续工作:\n$(cat $output1)"
+    print_info "Step 2: $(agent_name $agent2)（基于 Step 1 的结果）"
+    if ! run_agent "$agent2" "$task2" "$output2"; then
+        return 1
+    fi
+    
+    echo ""
+    
+    # Review
+    review_stage "$agent2" "$output2"
+    
+    print_success "链式工作流完成"
+}
+
+# 显示帮助
+show_help() {
+    cat << 'EOF'
+Pi Orchestrator - 简单直接的 Agent 协作
+
+用法:
+  pi-orchestrator simple <agent> "<task>"    # 简单工作流
+  pi-orchestrator parallel "<task>" <agent1> <agent2> ...  # 并行工作流
+  pi-orchestrator chain <agent1> <agent2> "<task>"  # 链式工作流
+  pi-orchestrator list                        # 列出可用 Agent
+
+参数:
+  <agent>  可以是: claude, codex, hermes, droid
+
+示例:
+  # 简单工作流：让 Claude 设计架构，然后 Review
+  pi-orchestrator simple claude "设计一个用户认证系统"
+
+  # 并行工作流：Claude 和 Codex 同时分析代码
+  pi-orchestrator parallel "分析这段代码" claude codex
+
+  # 链式工作流：Claude 设计，Codex 实现
+  pi-orchestrator chain claude codex "创建一个 TODO app"
+
+  # 在 Pi 中使用
+  # 1. Pi 作为主控，调用 orchestrator
+  !pi-orchestrator simple claude "设计 API"
+  
+  # 2. 读取结果进行 Review
+  read claude_20240115_120000.md
+  
+  # 3. 根据结果决定是否继续
+
+输出:
+  结果保存在: ~/.pi/orchestrator/results/
+  日志保存在: ~/.pi/orchestrator/logs/
+
+工作流说明:
+  1. Pi 作为主控，调用 orchestrator
+  2. orchestrator 运行指定 Agent
+  3. 捕获完整输出到文件
+  4. Pi 读取文件进行 Review
+  5. Pi 决定是否接受、修改或重新运行
+
+EOF
+}
+
+# 列出可用 Agent
+list_agents() {
+    print_header
+    print_title "可用 Agent"
+    print_header
+    echo ""
+    
+    local agents=("claude" "codex" "pi" "hermes" "droid")
+    
+    for agent in "${agents[@]}"; do
+        if check_agent "$agent"; then
+            print_success "$(agent_name $agent) ($agent)"
+        else
+            print_error "$(agent_name $agent) ($agent) - 未安装"
+        fi
+    done
+    echo ""
+}
+
+# 主入口
+main() {
+    init
+    
+    case "${1:-}" in
+        simple)
+            if [ $# -lt 3 ]; then
+                print_error "用法: pi-orchestrator simple <agent> \"<task>\""
+                exit 1
+            fi
+            simple_workflow "$2" "$3"
+            ;;
+        parallel)
+            if [ $# -lt 3 ]; then
+                print_error "用法: pi-orchestrator parallel \"<task>\" <agent1> <agent2> ..."
+                exit 1
+            fi
+            shift  # 移除 'parallel'
+            parallel_workflow "$@"
+            ;;
+        chain)
+            if [ $# -lt 4 ]; then
+                print_error "用法: pi-orchestrator chain <agent1> <agent2> \"<task>\""
+                exit 1
+            fi
+            chain_workflow "$2" "$3" "$4"
+            ;;
+        list|ls)
+            list_agents
+            ;;
+        help|-h|--help)
+            show_help
+            ;;
+        *)
+            show_help
+            ;;
+    esac
+}
+
+main "$@"
