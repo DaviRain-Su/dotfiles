@@ -157,6 +157,10 @@ install_dotfiles_rsync() {
     mkdir -p ~/.config
     ln -sf "${SCRIPT_DIR}/configs/starship.toml" ~/.config/starship.toml
     
+    # 链接 Ghostty 配置
+    mkdir -p ~/Library/Application\ Support/com.mitchellh.ghostty
+    ln -sf "${SCRIPT_DIR}/configs/ghostty/config" ~/Library/Application\ Support/com.mitchellh.ghostty/config
+    
     print_success "dotfiles 安装完成"
 }
 
@@ -183,6 +187,10 @@ install_dotfiles_symlink() {
     
     # starship.toml
     ln -sf "${SCRIPT_DIR}/configs/starship.toml" "$HOME/.config/starship.toml"
+    
+    # Ghostty 配置
+    mkdir -p "$HOME/Library/Application Support/com.mitchellh.ghostty"
+    ln -sf "${SCRIPT_DIR}/configs/ghostty/config" "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
     
     # 其他配置文件
     for file in .path .exports .aliases .functions .extra .curlrc .wgetrc .hushlogin; do
@@ -278,6 +286,7 @@ main() {
     echo "  - 编辑 ~/.extra 添加你的 Git 用户名和 API Keys"
     echo "  - 运行 'dot' 命令管理 dotfiles"
     echo "  - 运行 'c <project>' 快速进入项目"
+    echo "  - Ghostty 配置已链接到 ~/Library/Application Support/com.mitchellh.ghostty/config"
     echo ""
 }
 

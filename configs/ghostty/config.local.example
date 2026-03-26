@@ -1,0 +1,12 @@
+# Ghostty 本地自定义配置
+# 复制此文件到 ~/.config/ghostty/config.local 进行本地覆盖
+# 不会被 git 追踪，适合存放个人偏好设置
+
+# 示例：自定义字体大小
+# font-size = 16
+
+# 示例：自定义主题
+# theme = Dracula
+
+# 示例：自定义快捷键
+# keybind = cmd+shift+t=new_tab

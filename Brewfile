@@ -57,7 +57,11 @@ brew "neovim"
 # 媒体
 brew "ffmpeg"
 
+# 终端模拟器
+cask "ghostty"
+
 # 字体
 cask "font-meslo-lg-nerd-font"
 cask "font-jetbrains-mono-nerd-font"
 cask "font-fira-code-nerd-font"
+cask "font-hack-nerd-font"

@@ -18,6 +18,7 @@
 - **🌐 HTTP 客户端** - xh 现代化的 curl 替代品
 - **🔧 模块化配置** - 参考 keith/dotfiles 的模块化结构
 - **🍎 macOS 优化** - 系统设置脚本
+- **👻 [Ghostty](https://ghostty.org)** - 极速 GPU 加速终端
 
 ## 📦 包含工具
 
@@ -340,6 +341,69 @@ Preferences → Profiles → Window:
 - Transparency: **10-15**（轻微透明）
 - Blur: **10-20**（毛玻璃效果）
 
+## 👻 Ghostty 配置
+
+[Ghostty](https://ghostty.org) 是一个由 Zig 编写的高性能 GPU 加速终端模拟器。
+
+### 安装
+
+```bash
+brew install --cask ghostty
+```
+
+### 配置位置
+
+本 dotfiles 已将 Ghostty 配置链接到：
+
+```
+~/Library/Application Support/com.mitchellh.ghostty/config
+```
+
+### 配置文件
+
+- **主配置**: `~/dotfiles/configs/ghostty/config`
+- **本地覆盖**: `~/.config/ghostty/config.local`（不会被 git 追踪）
+
+### 主题切换
+
+查看所有可用主题：
+
+```bash
+ghostty +list-themes
+```
+
+编辑 `~/dotfiles/configs/ghostty/config` 修改主题：
+
+```
+# 使用单一主题
+theme = Tokyo Night
+
+# 根据系统外观自动切换
+theme = light:"GruvboxLight",dark:"Tokyo Night"
+```
+
+### 快捷键
+
+| 快捷键 | 功能 |
+|--------|------|
+| `Cmd + T` | 新建标签页 |
+| `Cmd + W` | 关闭当前 |
+| `Cmd + D` | 垂直分屏 |
+| `Cmd + Shift + D` | 水平分屏 |
+| `Cmd + [` / `Cmd + ]` | 切换分屏 |
+| `Cmd + Plus` | 放大字体 |
+| `Cmd + Minus` | 缩小字体 |
+| `Cmd + 0` | 重置字体 |
+| `Cmd + Shift + Enter` | 最大化当前分屏 |
+
+### 字体设置
+
+默认使用 **Hack Nerd Font Mono**，确保已安装 Nerd Font：
+
+```bash
+brew install --cask font-hack-nerd-font
+```
+
 ## 🔄 更新
 
 ### 使用 setup.sh 更新
@@ -381,6 +445,9 @@ dotfiles/
 │   ├── .zshenv           # 环境变量
 │   ├── .zshrc            # 主 zshrc（加载模块化配置）
 │   ├── starship.toml     # Starship 提示符配置
+│   ├── ghostty/          # Ghostty 终端配置
+│   │   ├── config        # 主配置文件
+│   │   └── themes/       # 自定义主题
 │   └── .gitconfig        # Git 配置模板
 ├── zsh/                   # 模块化 zsh 配置 ⭐
 │   ├── zshrc             # 主入口

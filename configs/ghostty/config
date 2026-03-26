@@ -1,0 +1,176 @@
+# Ghostty 终端配置
+# 文档: https://ghostty.org/docs/config
+# 配置路径: ~/Library/Application Support/com.mitchellh.ghostty/config
+
+# ============================================
+# 字体设置
+# ============================================
+# 主字体 - 使用 Nerd Font 获得图标支持
+font-family = "Hack Nerd Font Mono"
+font-family-bold = "Hack Nerd Font Mono Bold"
+font-family-italic = "Hack Nerd Font Mono Italic"
+font-family-bold-italic = "Hack Nerd Font Mono Bold Italic"
+
+# 字体大小
+font-size = 14
+
+# 字体特性 (禁用连字符，如果需要启用改为 true)
+font-feature = -calt
+font-feature = -liga
+font-feature = -dlig
+
+# ============================================
+# 窗口设置
+# ============================================
+# 窗口内边距
+window-padding-x = 12
+window-padding-y = 12
+
+# 窗口装饰 (macOS 默认)
+window-decoration = true
+
+# 启动时窗口大小 (字符数)
+window-width = 120
+window-height = 35
+
+# 保存窗口位置
+window-save-state = always
+
+# 窗口标题
+title = "Ghostty"
+
+# ============================================
+# 主题颜色
+# ============================================
+# 使用内置主题，完整列表: ghostty +list-themes
+# 推荐主题: Tokyo Night, Dracula, Catppuccin, CLRS, 12-bit Rainbow
+
+# 当前主题
+# theme = CLRS
+# theme = "12-bit Rainbow"
+theme = light:"GruvboxLight",dark:"Tokyo Night"
+
+# 根据系统外观自动切换
+dark-mode = detection
+
+# 背景透明度 (0.0 - 1.0，1.0 = 不透明)
+background-opacity = 0.95
+background-blur-radius = 20
+
+# ============================================
+# 光标设置
+# ============================================
+# 光标样式: block, bar, underline
+cursor-style = bar
+
+# 光标闪烁
+cursor-style-blink = true
+
+# 光标颜色 (使用终端配色)
+cursor-color =
+cursor-text-color =
+
+# ============================================
+# 滚动设置
+# ============================================
+# 滚动缓冲区行数
+scrollback-limit = 100000
+
+# 使用鼠标滚轮滚动时逐行
+mouse-scroll-multiplier = 1
+
+# ============================================
+# 快捷键绑定
+# ============================================
+# Ghostty 使用 kitty 键盘协议，支持更丰富的快捷键
+
+# 基础快捷键 (macOS 风格)
+keybind = cmd+c=copy_to_clipboard
+keybind = cmd+v=paste_from_clipboard
+keybind = cmd+a=select_all
+keybind = cmd+t=new_tab
+keybind = cmd+w=close_surface
+keybind = cmd+n=new_window
+keybind = cmd+q=quit
+
+# Tab 导航
+keybind = cmd+1=goto_tab:1
+keybind = cmd+2=goto_tab:2
+keybind = cmd+3=goto_tab:3
+keybind = cmd+4=goto_tab:4
+keybind = cmd+5=goto_tab:5
+keybind = cmd+6=goto_tab:6
+keybind = cmd+7=goto_tab:7
+keybind = cmd+8=goto_tab:8
+keybind = cmd+9=goto_tab:9
+
+# 分屏 (Splits)
+keybind = cmd+d=new_split:right
+keybind = cmd+shift+d=new_split:down
+keybind = cmd+[=goto_split:previous
+keybind = cmd+]=goto_split:next
+keybind = cmd+shift+enter=toggle_split_zoom
+
+# 字体大小调整
+keybind = cmd+plus=increase_font_size:1
+keybind = cmd+minus=decrease_font_size:1
+keybind = cmd+0=reset_font_size
+
+# 全屏
+keybind = ctrl+cmd+f=toggle_fullscreen
+
+# 快速终端 (Quake 模式)
+# keybind = global:cmd+grave_accent=toggle_quick_terminal
+
+# 重命名 Tab
+keybind = cmd+shift+r=rename_tab
+
+# ============================================
+# 鼠标设置
+# ============================================
+# 鼠标隐藏行为
+mouse-hide-while-typing = true
+
+# 右键粘贴 (可选)
+# mouse-bind = right=paste_from_clipboard
+
+# ============================================
+# Shell 集成
+# ============================================
+# 自动检测 shell 集成 (推荐保持开启)
+shell-integration = detect
+
+# 自定义 shell (默认使用 $SHELL)
+# shell = /bin/zsh
+
+# ============================================
+# 性能设置
+# ============================================
+# 渲染器设置
+# renderer = auto  # 自动选择: metal (macOS), opengl, software
+
+# 刷新率 (macOS 默认使用显示器刷新率)
+# refresh-rate = 60
+
+# ============================================
+# 高级设置
+# ============================================
+# 工作目录行为
+window-inherit-working-directory = true
+
+tab-inherit-working-directory = true
+
+# 启用 CSI u 键盘协议 (更好的快捷键支持)
+keyboard-protocol = csi-u
+
+# 启用图形协议 (图片显示)
+image-protocol = sixel  # 或 "kitty-graphics"
+
+# ============================================
+# 包含额外配置 (可选)
+# ============================================
+# 可以按条件包含其他配置文件
+# config-file = ?auto/theme.ghostty
+
+# 本地自定义配置 (不会被 git 追踪)
+config-file = ?~/.config/ghostty/config.local
