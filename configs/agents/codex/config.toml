@@ -1,0 +1,32 @@
+model = "gpt-5.3-codex-spark"
+personality = "pragmatic"
+model_reasoning_effort = "xhigh"
+service_tier = "fast"
+approvals_reviewer = "guardian_subagent"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+# 项目信任配置（示例）
+[projects."/Users/$USER/dev"]
+trust_level = "trusted"
+
+[projects."/Users/$USER/Documents"]
+trust_level = "trusted"
+
+[notice]
+hide_gpt5_1_migration_prompt = true
+"hide_gpt-5.1-codex-max_migration_prompt" = true
+
+[notice.model_migrations]
+"gpt-5.1-codex-max" = "gpt-5.2-codex"
+
+[tui]
+theme = "inspired-github"
+
+[features]
+multi_agent = true
+js_repl = true
+apps = true
+guardian_approval = true
+tui_app_server = true
+prevent_idle_sleep = true

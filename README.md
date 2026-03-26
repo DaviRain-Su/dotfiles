@@ -550,15 +550,49 @@ Agent 配置位于 `~/dotfiles/configs/agents/`：
 ```
 configs/agents/
 ├── claude/
-│   └── config.sh
+│   ├── settings.json    # Claude Code 主配置
+│   ├── CLAUDE.md        # Claude 系统提示词
+│   └── config.sh        # 环境变量
 ├── codex/
+│   ├── config.toml      # Codex 主配置
 │   └── config.sh
 ├── opencode/
 │   └── config.sh
 ├── pi/
 │   └── config.sh
 └── hermes/
+    ├── config.yaml      # Hermes 主配置（个性化、模型等）
     └── config.sh
+```
+
+### 个人偏好配置
+
+#### Claude Code
+- **Model**: `opus[1m]`
+- **Plugins**: 启用 rust-analyzer-lsp
+- **Hooks**: RTK 重写钩子
+
+#### Codex
+- **Model**: `gpt-5.3-codex-spark`
+- **Personality**: `pragmatic`
+- **Theme**: `inspired-github`
+- **Features**: 多 Agent、Guardian 审批、TUI 应用服务器
+
+#### Hermes
+- **Model**: `kimi-k2.5` (via Moonshot)
+- **Personality**: `kawaii` (可爱风格)
+- **Display**: 流式输出、工具进度显示
+- **Memory**: 启用用户画像和记忆功能
+
+### 自定义配置
+
+如需修改配置，编辑 `~/dotfiles/configs/agents/<agent>/` 下的文件，然后运行：
+
+```bash
+# 配置会自动链接到对应位置
+# Claude: ~/.claude/
+# Codex: ~/.codex/
+# Hermes: ~/.hermes/
 ```
 
 ## 🔄 更新

@@ -195,6 +195,28 @@ install_dotfiles_symlink() {
     # Tmux 配置
     ln -sf "${SCRIPT_DIR}/configs/tmux/tmux.conf" "$HOME/.tmux.conf"
     
+    # AI Agent 配置
+    print_info "配置 AI Agent..."
+    mkdir -p "$HOME/.claude" "$HOME/.codex" "$HOME/.hermes"
+    
+    # Claude Code 配置
+    if [ -f "${SCRIPT_DIR}/configs/agents/claude/settings.json" ]; then
+        ln -sf "${SCRIPT_DIR}/configs/agents/claude/settings.json" "$HOME/.claude/settings.json"
+    fi
+    if [ -f "${SCRIPT_DIR}/configs/agents/claude/CLAUDE.md" ]; then
+        ln -sf "${SCRIPT_DIR}/configs/agents/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+    fi
+    
+    # Codex 配置
+    if [ -f "${SCRIPT_DIR}/configs/agents/codex/config.toml" ]; then
+        ln -sf "${SCRIPT_DIR}/configs/agents/codex/config.toml" "$HOME/.codex/config.toml"
+    fi
+    
+    # Hermes 配置
+    if [ -f "${SCRIPT_DIR}/configs/agents/hermes/config.yaml" ]; then
+        ln -sf "${SCRIPT_DIR}/configs/agents/hermes/config.yaml" "$HOME/.hermes/config.yaml"
+    fi
+    
     # 其他配置文件
     for file in .path .exports .aliases .functions .extra .curlrc .wgetrc .hushlogin; do
         if [ -f "${SCRIPT_DIR}/configs/$file" ]; then
