@@ -40,6 +40,9 @@ check_agent() {
         hermes)
             command -v hermes &> /dev/null
             ;;
+        factory|droid)
+            command -v droid &> /dev/null
+            ;;
         *)
             return 1
             ;;
@@ -65,6 +68,9 @@ get_version() {
         hermes)
             hermes --version 2>/dev/null | head -1 || echo "unknown"
             ;;
+        factory|droid)
+            droid --version 2>/dev/null | head -1 || echo "unknown"
+            ;;
         *)
             echo "unknown"
             ;;
@@ -77,7 +83,7 @@ list_agents() {
     echo "🤖 已安装的 AI Agent:"
     echo ""
     
-    local agents=("claude" "codex" "opencode" "pi" "hermes")
+    local agents=("claude" "codex" "opencode" "pi" "hermes" "droid")
     
     for agent in "${agents[@]}"; do
         if check_agent "$agent"; then
@@ -157,6 +163,15 @@ install_agents() {
         print_warning "Hermes 已安装，跳过"
     fi
     
+    # 安装 Factory.ai (droid)
+    if ! check_agent "droid"; then
+        print_info "安装 Factory.ai CLI (droid)..."
+        curl -fsSL https://app.factory.ai/cli | sh
+        print_success "Factory.ai CLI (droid) 安装完成"
+    else
+        print_warning "Factory.ai (droid) 已安装，跳过"
+    fi
+    
     print_success "所有 AI Agent 安装完成！"
     list_agents
 }
@@ -199,6 +214,10 @@ launch_agent() {
             print_info "启动 Hermes..."
             hermes "$@"
             ;;
+        droid)
+            print_info "启动 Factory.ai (droid)..."
+            droid "$@"
+            ;;
         *)
             print_error "未知的 agent: $agent"
             exit 1
@@ -214,7 +233,7 @@ case "${1:-}" in
     install|-i|--install)
         install_agents
         ;;
-    claude|codex|opencode|pi|hermes)
+    claude|codex|opencode|pi|hermes|droid)
         launch_agent "$@"
         ;;
     help|-h|--help)
@@ -229,10 +248,12 @@ case "${1:-}" in
         echo "  ai opencode      启动 OpenCode"
         echo "  ai pi            启动 Pi"
         echo "  ai hermes        启动 Hermes"
+        echo "  ai droid         启动 Factory.ai (droid)"
         echo ""
         echo "示例:"
         echo "  ai claude        启动 Claude Code"
         echo "  ai pi            启动 Pi"
+        echo "  ai droid         启动 Factory.ai (droid)"
         echo ""
         ;;
     *)

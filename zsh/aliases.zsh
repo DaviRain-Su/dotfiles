@@ -86,6 +86,7 @@ alias aip='ai pi'
 alias aico='ai codex'
 alias aio='ai opencode'
 alias aih='ai hermes'
+alias aid='ai droid'
 alias ail='ai list'
 
 # ============================================
