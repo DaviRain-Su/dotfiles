@@ -1,0 +1,8 @@
+{
+  "name": "pi-agent-matrix",
+  "version": "0.2.0",
+  "description": "YOLO Mode Agent Matrix - One command, full automation",
+  "type": "module",
+  "keywords": ["pi-package", "yolo", "agent-matrix", "auto-pilot"],
+  "main": "index.ts"
+}
